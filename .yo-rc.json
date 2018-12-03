@@ -1,0 +1,9 @@
+{
+  "generator-node": {
+    "promptValues": {
+      "authorName": "Aaron Shiffler, Ryan Gewondjan",
+      "authorEmail": "",
+      "authorUrl": ""
+    }
+  }
+}
