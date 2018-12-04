@@ -3,6 +3,7 @@ const cliPrompts = require('./cliPrompts.js');
 const Generator = require('yeoman-generator');
 const proc = require('child_process');
 const moment = require('moment');
+const fs = require('fs');
 
 module.exports = class extends Generator {
 
@@ -40,33 +41,64 @@ module.exports = class extends Generator {
 
   }
 
-  prompting() {
+  async prompting() {
+    
+    // Read in the package.json file
+    var options = {
+      windowsHide: false,
+      stdio: [this.log, this.log, this.log]
+
+    };
+    try {
+      proc.execSync(`npm init`, options);
+    } catch (e) {
+      this.log(e);
+    }
+      
+      
+      /* , (error, stdout, stderr) => {
+      if (error) {
+        this.log(`exec error: ${error}`);
+        return;
+      }
+      this.log("stdout: " + stdout);
+      this.log("error: " + error);
+
+    }); */
+
+    // proc.execSync('npm init');
+    //var packageJson = fs.readFileSync('./package.json').toString();
+
+
+    //Prompt for byui 
     return this.prompt(cliPrompts)
-      .then(answers => {
+      .then(byuiAnswers => {
         // To access props later use this.props.someAnswer;
-        this.answers = answers;
+        this.byuiAnswers = byuiAnswers;
+
+        //2nd overwrites the first
 
         //Make a variable that has a brief description indicating what the parent project is.
         this.parentProjectDescription =
-          `\nThis is part of the [${this.answers.parentProject}](https://github.com/byuitechops/${this.answers.parentProject}) project.\n`;
+          `\nThis is part of the [${this.byuiAnswers.parentProject}](https://github.com/byuitechops/${this.byuiAnswers.parentProject}) project.\n`;
       })
-      .then(() => this.repoName = this._setUpRepo(this.answers.title))
-      .then(() => this._formatKeyWords(this.answers.keywords));
+      .then(() => this.repoName = this._setUpRepo(this.byuiAnswers.title))
+      .then(() => this._formatKeyWords(this.byuiAnswers.keywords));
   }
 
 
 
   writing() {
     this.content = {
-      projectTitle: this.answers.title,
+      projectTitle: this.byuiAnswers.title,
       repoName: this.repoName,
-      author: this.answers.author,
-      parentProjectDescription: this.answers.hasParentProject ? this.parentProjectDescription : '',
-      projectDescription: this.answers.description,
-      projectPurpose: this.answers.purpose,
-      projectStakeholders: this.answers.stakeholders,
-      keywords: this._formatKeyWords(this.answers.keywords),
-      projectSize: this.answers.size,
+      author: this.byuiAnswers.author,
+      parentProjectDescription: this.byuiAnswers.hasParentProject ? this.parentProjectDescription : '',
+      projectDescription: this.byuiAnswers.description,
+      projectPurpose: this.byuiAnswers.purpose,
+      projectStakeholders: this.byuiAnswers.stakeholders,
+      keywords: this._formatKeyWords(this.byuiAnswers.keywords),
+      projectSize: this.byuiAnswers.size,
       timeCreated: moment().format('YYYY MMMM DD, hh:mm A'),
     };
     this.fs.copyTpl(
