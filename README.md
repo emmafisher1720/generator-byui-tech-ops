@@ -7,7 +7,7 @@ First, install [Yeoman](http://yeoman.io) and generator-byui-tech-ops using [npm
 
 ```bash
 npm install -g yo
-npm install -g generator-byui-tech-ops
+npm install -g https://github.com/byuitechops/generator-byui-tech-ops
 ```
 
 Then generate your new project:
