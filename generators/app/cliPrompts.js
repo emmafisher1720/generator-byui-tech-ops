@@ -118,13 +118,13 @@ var sizeQuestion = {
 };
 
 module.exports = [
-  nameQuestion,
-  authorQuestion,
-  hasParentProjectQuestion,
-  parentProjectNameQuestion,
-  descriptionQuestion,
-  purposeQuestion,
-  stakeholdersQuestion,
-  keywordsQuestion,
+  // nameQuestion,
+  // authorQuestion,
+  // hasParentProjectQuestion,
+  // parentProjectNameQuestion,
+  // descriptionQuestion,
+  // purposeQuestion,
+  // stakeholdersQuestion,
+  // keywordsQuestion,
   sizeQuestion,
 ];

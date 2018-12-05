@@ -25,8 +25,6 @@ yo byui-tech-ops
 
 ## License
 
- © [Ryan Gewondjan]()
-
 
 [npm-image]: https://badge.fury.io/js/generator-byui.svg
 [npm-url]: https://npmjs.org/package/generator-byui
