@@ -7,13 +7,13 @@ First, install [Yeoman](http://yeoman.io) and generator-byui using [npm](https:/
 
 ```bash
 npm install -g yo
-npm install -g generator-byui
+npm install -g generator-byui-tech-ops
 ```
 
 Then generate your new project:
 
 ```bash
-yo byui
+yo byui-tech-ops
 ```
 
 ## Getting To Know Yeoman
