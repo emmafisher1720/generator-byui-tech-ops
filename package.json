@@ -32,10 +32,10 @@
     "npm": ">= 4.0.0"
   },
   "dependencies": {
-    "yeoman-generator": "^2.0.1",
     "chalk": "^2.1.0",
-    "yosay": "^2.0.1",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "yeoman-generator": "^2.0.1",
+    "yosay": "^2.0.1"
   },
   "jest": {
     "testEnvironment": "node"
