@@ -16,9 +16,16 @@ Then generate your new project:
 yo byui-tech-ops
 ```
 
-To update the tool on your machine run
+To update the tool on your machine run:
+
 ```bash
 npm install -g https://github.com/byuitechops/generator-byui-tech-ops
+```
+
+To uninstall:
+
+```bash
+npm uninstall -g generator-byui-tech-ops
 ```
 
 ## Getting To Know Yeoman

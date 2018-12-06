@@ -13,15 +13,11 @@ function noBlank(input, answerHash) {
   else return 'this cannot be left blank!';
 }
 
-var nameQuestion = {
+var titleQuestion = {
   name: 'title',
   type: 'input',
   message: messagePadEnd('Project Name'),
   suffix: ':',
-  transformer: (input, answerHash) => { // add link attribute to answers hash
-    answerHash.repositoryLink = new url.URL(input, baseUrl).href;
-    return input;
-  },
   validate: noBlank,
   default: (answerHash) => {
     if (thisFolderInfo.isGitRepository()) {
@@ -31,6 +27,25 @@ var nameQuestion = {
   }
 };
 
+var versionQuestion = {
+  name: 'version',
+  type: 'input',
+  message: messagePadEnd('Version:'),
+  suffix: ':',
+  validate: noBlank,
+  default: "1.0.0"
+};
+
+var entryPointQuestion = {
+  name: 'entryPoint',
+  type: 'input',
+  message: messagePadEnd('Entry Point:'),
+  suffix: ':',
+  validate: noBlank,
+  default: "main.js",
+  //add the .js extension if it has not been provided.
+  filter: (input) => /.js/.test(input) ? input : input + ".js"
+};
 var authorQuestion = {
   name: 'author',
   type: 'input',
@@ -47,22 +62,42 @@ var hasParentProjectQuestion = {
   default: false,
 };
 
-var parentProjectNameQuestion = {
+var parentProjectQuestion = {
   name: 'parentProject',
   type: 'input',
   message: messagePadEnd('Exact name of parent repository'),
   suffix: ':',
-  transformer: (input, answerHash) => { // add parentProjectLink attribute to answers hash
-    answerHash.parentProjectLink = new url.URL(input, baseUrl).href;
-    return input;
-  },
   when: (answerHash) => answerHash.hasParentProject,
+  validate: noBlank,
+};
+
+var installInstructionsQuestion = {
+  name: 'installInstructions',
+  type: 'input',
+  message: messagePadEnd('Installation Instructions'),
+  suffix: ':',
+  validate: noBlank,
+};
+
+var runRequirementsQuestion = {
+  name: 'runRequirements',
+  type: 'editor',
+  message: messagePadEnd('Run Requirements'),
+  suffix: ':',
+  validate: noBlank,
+};
+
+var processQuestion = {
+  name: 'process',
+  type: 'editor',
+  message: messagePadEnd('Process'),
+  suffix: ':',
   validate: noBlank,
 };
 
 var descriptionQuestion = {
   name: 'description',
-  type: 'input',
+  type: 'editor',
   message: messagePadEnd('Project Description (What)'),
   suffix: ':',
   validate: noBlank,
@@ -90,10 +125,7 @@ var keywordsQuestion = {
   message: messagePadEnd('List keywords separated by commas'),
   suffix: ':',
   validate: noBlank,
-  filter: (input) => input.replace(/\s/g, '')
-
 };
-
 
 var sizeValueToPromptAdapter = {
   mini: 'mini   - less than 1 week to complete',
@@ -101,30 +133,42 @@ var sizeValueToPromptAdapter = {
   medium: 'medium - less than 2 months to complete',
   large: 'large  - 2 months or more to complete',
 };
+
 var sizePromptToValueAdapter = {
   [sizeValueToPromptAdapter.mini]: 'mini',
   [sizeValueToPromptAdapter.small]: 'small',
   [sizeValueToPromptAdapter.medium]: 'medium',
   [sizeValueToPromptAdapter.large]: 'large',
 };
+
 var sizeQuestion = {
   name: 'size',
   type: 'list',
   message: messagePadEnd('What is the size of this project?'),
   suffix: ':',
   choices: Object.values(sizeValueToPromptAdapter),
-  transformer: (input, answerHash) => sizePromptToValueAdapter[input],
-  filter: (input) => sizePromptToValueAdapter[input],
+  //Store the size value as a single word (mini, small, medium or large).
+  filter: (input) => sizePromptToValueAdapter[input]
 };
 
 module.exports = [
-  nameQuestion,
+  titleQuestion,
+  versionQuestion,
+  entryPointQuestion,
   authorQuestion,
   hasParentProjectQuestion,
-  parentProjectNameQuestion,
+  parentProjectQuestion,
+  // installInstructionsQuestion,
+  // runRequirementsQuestion,
+  // processQuestion,
   descriptionQuestion,
   purposeQuestion,
   stakeholdersQuestion,
   keywordsQuestion,
   sizeQuestion,
 ];
+
+/*Other questions we can add from 'npm init':
+ test command: (didn't add this question)
+License:  (defaulted to MIT so not asking this question)
+*/
