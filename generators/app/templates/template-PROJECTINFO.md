@@ -1,17 +1,17 @@
-# <%= projectTitle %>
+# <%= title %>
 [Go to the Repository](https://github.com/byuitechops/<%= repoName %>)
 <%= parentProjectDescription %>
 **Description**
-> <%= projectDescription %>
+> <%= description %>
 
 **Purpose**
-> <%= projectPurpose %>
+> <%= purpose %>
                 
 **Stakeholders**
-> <%= projectStakeholders %>
+> <%= stakeholders %>
                     
 **Size**
-> <%= projectSize %>
+> <%= size %>
 
 
 This document created: <%= timeCreated %>

@@ -4,7 +4,7 @@ const Generator = require('yeoman-generator');
 const proc = require('child_process');
 const moment = require('moment');
 
-module.exports = class extends Generator {
+module.exports = class ByuiTechOpsGenerator extends Generator {
 
   constructor(args, opts) {
     super(args, opts);
@@ -22,20 +22,6 @@ module.exports = class extends Generator {
     return repoName;
   }
 
-  _formatKeyWords(keywordString) {
-    var keywordsArray = keywordString.split(',');
-    // this.log(keywordString);
-    // this.log(keywordsArray);
-    var str = JSON.stringify(keywordsArray);
-    this.log(str);
-    return str;
-    // keywordsArray = keywordsArray.map(word => {
-    //   return '"' + word + '"';
-    // });
-    // this.log(keywordsArray);
-    // return keywordsArray.join(',\n');
-  }
-
   initializing() {
 
   }
@@ -45,57 +31,109 @@ module.exports = class extends Generator {
       .then(answers => {
         // To access props later use this.props.someAnswer;
         this.answers = answers;
-
-        //Make a variable that has a brief description indicating what the parent project is.
-        this.parentProjectDescription =
-          `\nThis is part of the [${this.answers.parentProject}](https://github.com/byuitechops/${this.answers.parentProject}) project.\n`;
-      })
-      .then(() => this.repoName = this._setUpRepo(this.answers.title))
-      .then(() => this._formatKeyWords(this.answers.keywords));
+      });
   }
 
-
-
-  writing() {
+  configuring() {
+    //Create the contents object whose values will be placed in various places in the templates
     this.content = {
       projectTitle: this.answers.title,
-      repoName: this.repoName,
+      repoName: this._setUpRepo(this.answers.title),
+      version: this.answers.version,
+      mainJs: /.js/.test(this.answers.mainJs) ? this.answers.mainJs : this.answers.mainJs + ".js", //add the .js extension if it has not been provided.
       author: this.answers.author,
-      parentProjectDescription: this.answers.hasParentProject ? this.parentProjectDescription : '',
+      installInstructions: this.answers.installInstructions,
+      runRequirements: this.answers.runRequirements,
+      process: this.answers.process,
+      parentProjectDescription: this.answers.hasParentProject ? `\nThis is part of the [${this.answers.parentProject}](https://github.com/byuitechops/${this.answers.parentProject}) project.\n` : '',
       projectDescription: this.answers.description,
       projectPurpose: this.answers.purpose,
       projectStakeholders: this.answers.stakeholders,
-      keywords: this._formatKeyWords(this.answers.keywords),
+      keywords: this.answers.keywords.split(','), //Convert the string of keywords to an array
       projectSize: this.answers.size,
       timeCreated: moment().format('YYYY MMMM DD, hh:mm A'),
     };
+
+    //answerHash.repositoryLink = new url.URL(input, baseUrl).href;
+    // answerHash.parentProjectLink = new url.URL(input, baseUrl).href;
+
+    //Package.json template
+    this.packageJson = {
+      name: this.content.repoName,
+      version: this.content.version,
+      description: this.content.projectDescription,
+      main: this.content.mainJs,
+      scripts: {},
+      repository: {
+        type: "git",
+        url: `git+https://github.com/byuitechops/${this.content.repoName}`
+      },
+      keywords: this.content.keywords,
+      bugs: {
+        url: `https://github.com/byuitechops/${this.content.repoName}/issues`
+      },
+      homepage: `https://github.com/byuitechops/${this.content.repoName}#readme`,
+      dependencies: {},
+      author: this.content.author,
+      license: "MIT",
+      devDependencies: {},
+      repository: `byuitechops/${this.content.repoName}`,
+      byui: {
+        projectPurpose: this.content.projectPurpose,
+        projectStakeholders: this.content.projectStakeholders,
+        projectSize: this.content.projectSize,
+        timeCreated: this.content.timeCreated
+      }
+    }
+  }
+
+  //Default (other methods are run here)
+
+  writing() {
+    //This note from: https://yeoman.io/authoring/file-system.html
+    //"The destination context is defined as either the current working directory or the closest parent folder containing a .yo-rc.json file."
+
+    //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
+    //command was called.
+    this.destinationRoot(this.contextRoot);
+
+    //Write PROJECTINFO.md
     this.fs.copyTpl(
       this.templatePath('template-PROJECTINFO.md'),
-      this.destinationPath(`${this.repoName}/PROJECTINFO.md`),
+      this.destinationPath(`${this.content.repoName}/PROJECTINFO.md`),
       this.content
     );
 
+    //Write package.json
+    this.fs.writeJSON(`${this.content.repoName}/package.json`, this.packageJson);
+
+    //Write main.js file
     this.fs.copyTpl(
-      this.templatePath('template-package.json'),
-      this.destinationPath(`${this.repoName}/package.json`),
+      this.templatePath('template-main.js'),
+      this.destinationPath(`${this.content.repoName}/${this.content.mainJs}`),
       this.content
     );
 
+    // this.fs.copyTpl(
+    //   this.templatePath('template-README.md'),
+    //   this.destinationPath(`${this.content.repoName}/README.md`),
+    //   this.content
+    // );
 
 
+  }
+
+  conflicts() {
+    //Handle conflicts
   }
 
   // install() {
   //   this.installDependencies();
   // }
 
-
   end() {
     //this.log("in end method");
     //proc.exec(`cd ${this.repoName}`)
-
-
-
   }
 
 };

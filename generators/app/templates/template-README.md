@@ -1,19 +1,17 @@
-# Project Documentation Generator
-[Go to the Repository](https://github.com/byuitechops/<%= projectName %>)
+# <%= title %>
 
-This is part of the [<%= parentProject %>](https://github.com/byuitechops/<%= parentProject %>) project.
+## Purpose
 
-**Description**
-> <%= projectDescription %>
+<%= purpose %>
 
-**Purpose**
-> <%= projectPurpose %>
-                
-**Stakeholders**
-> <%= projectStakeholders %>
-                    
-**Size**
-> <%= projectSize %>
+## How to Install
 
+<%= installInstructions %>
 
-This document created: <%= timeCreated %>
+## Run Requirements
+
+<%= runRequirements %>
+
+## Process
+
+<%= process %>

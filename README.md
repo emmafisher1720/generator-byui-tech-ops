@@ -3,17 +3,29 @@
 
 ## Installation
 
-First, install [Yeoman](http://yeoman.io) and generator-byui using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
+First, install [Yeoman](http://yeoman.io) and generator-byui-tech-ops using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
 
 ```bash
 npm install -g yo
-npm install -g generator-byui
+npm install -g https://github.com/byuitechops/generator-byui-tech-ops
 ```
 
 Then generate your new project:
 
 ```bash
-yo byui
+yo byui-tech-ops
+```
+
+To update the tool on your machine run:
+
+```bash
+npm install -g https://github.com/byuitechops/generator-byui-tech-ops
+```
+
+To uninstall:
+
+```bash
+npm uninstall -g generator-byui-tech-ops
 ```
 
 ## Getting To Know Yeoman
@@ -24,8 +36,6 @@ yo byui
  * Feel free to [learn more about Yeoman](http://yeoman.io/).
 
 ## License
-
- © [Ryan Gewondjan]()
 
 
 [npm-image]: https://badge.fury.io/js/generator-byui.svg
