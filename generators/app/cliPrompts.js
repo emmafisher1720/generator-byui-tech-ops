@@ -1,7 +1,4 @@
-const url = require('url');
 const thisFolderInfo = require('./thisFolderInfo.js');
-const baseUrl = 'https://github.com/byuitechops/';
-
 
 function messagePadEnd(string) {
   let padding = 33;
@@ -81,7 +78,7 @@ var installInstructionsQuestion = {
 
 var runRequirementsQuestion = {
   name: 'runRequirements',
-  type: 'editor',
+  type: 'input',
   message: messagePadEnd('Run Requirements'),
   suffix: ':',
   validate: noBlank,
@@ -89,7 +86,7 @@ var runRequirementsQuestion = {
 
 var processQuestion = {
   name: 'process',
-  type: 'editor',
+  type: 'input',
   message: messagePadEnd('Process'),
   suffix: ':',
   validate: noBlank,
@@ -158,9 +155,9 @@ module.exports = [
   authorQuestion,
   hasParentProjectQuestion,
   parentProjectQuestion,
-  // installInstructionsQuestion,
-  // runRequirementsQuestion,
-  // processQuestion,
+  installInstructionsQuestion,
+  runRequirementsQuestion,
+  processQuestion,
   descriptionQuestion,
   purposeQuestion,
   stakeholdersQuestion,
