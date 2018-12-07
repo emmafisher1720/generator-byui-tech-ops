@@ -2,6 +2,8 @@
 ## Introduction 
 TODO: A brief description of the project
 
+description
+
 ## Getting Started
 Standard Install Instructions
 1. Clone this repository: `git clone https://github.com/byuitechops/<%= RepoName %>.git`

@@ -3,7 +3,8 @@ const cliPrompts = require('./cliPrompts.js');
 const Generator = require('yeoman-generator');
 const proc = require('child_process');
 const moment = require('moment');
-
+const url = require('url');
+const baseUrl = 'https://github.com/byuitechops/';
 module.exports = class ByuiTechOpsGenerator extends Generator {
 
   constructor(args, opts) {
@@ -35,54 +36,40 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
   }
 
   configuring() {
-    //Create the contents object whose values will be placed in various places in the templates
-    this.content = {
-      projectTitle: this.answers.title,
-      repoName: this._setUpRepo(this.answers.title),
-      version: this.answers.version,
-      mainJs: /.js/.test(this.answers.mainJs) ? this.answers.mainJs : this.answers.mainJs + ".js", //add the .js extension if it has not been provided.
-      author: this.answers.author,
-      installInstructions: this.answers.installInstructions,
-      runRequirements: this.answers.runRequirements,
-      process: this.answers.process,
-      parentProjectDescription: this.answers.hasParentProject ? `\nThis is part of the [${this.answers.parentProject}](https://github.com/byuitechops/${this.answers.parentProject}) project.\n` : '',
-      projectDescription: this.answers.description,
-      projectPurpose: this.answers.purpose,
-      projectStakeholders: this.answers.stakeholders,
-      keywords: this.answers.keywords.split(','), //Convert the string of keywords to an array
-      projectSize: this.answers.size,
-      timeCreated: moment().format('YYYY MMMM DD, hh:mm A'),
-    };
-
-    //answerHash.repositoryLink = new url.URL(input, baseUrl).href;
-    // answerHash.parentProjectLink = new url.URL(input, baseUrl).href;
+    //Add the following to our answers object
+    this.answers.repoName = this._setUpRepo(this.answers.title);
+    this.answers.repositoryLink = new url.URL(this.answers.repoName, baseUrl).href;
+    this.answers.parentProjectLink = new url.URL(this.answers.parentProject, baseUrl).href;
+    this.answers.parentProjectDescription = this.answers.hasParentProject ? `\nThis is part of the [${this.answers.parentProject}](${this.answers.parentProjectLink}) project.\n` : '';
+    this.answers.timeCreated = moment().format('YYYY MMMM DD, hh:mm A');
+    this.answers.keywords = this.answers.keywords.split(',');
 
     //Package.json template
     this.packageJson = {
-      name: this.content.repoName,
-      version: this.content.version,
-      description: this.content.projectDescription,
-      main: this.content.mainJs,
+      name: this.answers.repoName,
+      version: this.answers.version,
+      description: this.answers.description,
+      main: this.answers.entryPoint,
       scripts: {},
       repository: {
         type: "git",
-        url: `git+https://github.com/byuitechops/${this.content.repoName}`
+        url: this.answers.repositoryLink
       },
-      keywords: this.content.keywords,
+      keywords: this.answers.keywords,
       bugs: {
-        url: `https://github.com/byuitechops/${this.content.repoName}/issues`
+        url: `${this.answers.repositoryLink}/issues`
       },
-      homepage: `https://github.com/byuitechops/${this.content.repoName}#readme`,
+      homepage: `${this.answers.repositoryLink}#readme`,
       dependencies: {},
-      author: this.content.author,
+      author: this.answers.author,
       license: "MIT",
       devDependencies: {},
-      repository: `byuitechops/${this.content.repoName}`,
+      repository: `byuitechops/${this.answers.repoName}`,
       byui: {
-        projectPurpose: this.content.projectPurpose,
-        projectStakeholders: this.content.projectStakeholders,
-        projectSize: this.content.projectSize,
-        timeCreated: this.content.timeCreated
+        projectPurpose: this.answers.purpose,
+        projectStakeholders: this.answers.stakeholders,
+        projectSize: this.answers.size,
+        timeCreated: this.answers.timeCreated
       }
     }
   }
@@ -99,26 +86,40 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
     //Write PROJECTINFO.md
     this.fs.copyTpl(
-      this.templatePath('template-PROJECTINFO.md'),
-      this.destinationPath(`${this.content.repoName}/PROJECTINFO.md`),
-      this.content
+      this.templatePath('PROJECTINFO.md'),
+      this.destinationPath(`${this.answers.repoName}/PROJECTINFO.md`),
+      this.answers
     );
 
     //Write package.json
-    this.fs.writeJSON(`${this.content.repoName}/package.json`, this.packageJson);
+    this.fs.writeJSON(`${this.answers.repoName}/package.json`, this.packageJson);
 
     //Write main.js file
     this.fs.copyTpl(
-      this.templatePath('template-main.js'),
-      this.destinationPath(`${this.content.repoName}/${this.content.mainJs}`),
-      this.content
+      this.templatePath('main.js'),
+      this.destinationPath(`${this.answers.repoName}/${this.answers.entryPoint}`),
+      this.answers
     );
 
-    // this.fs.copyTpl(
-    //   this.templatePath('template-README.md'),
-    //   this.destinationPath(`${this.content.repoName}/README.md`),
-    //   this.content
-    // );
+    //Write entry.js file
+    this.fs.copyTpl(
+      this.templatePath('entry.js'),
+      this.destinationPath(`${this.answers.repoName}/entry.js`),
+      this.answers
+    );
+
+    //Write entry.js file
+    this.fs.copyTpl(
+      this.templatePath('test.js'),
+      this.destinationPath(`${this.answers.repoName}/test.js`),
+      this.answers
+    );
+
+    this.fs.copyTpl(
+      this.templatePath('README.md'),
+      this.destinationPath(`${this.answers.repoName}/README.md`),
+      this.answers
+    );
 
 
   }
