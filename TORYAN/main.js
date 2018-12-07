@@ -6,7 +6,7 @@ module.exports = {
         supportingFunction1 ();
         supportingFunction2 ();
         supportingFunction3 ();
-        return 0;
+        return args;
     }
 };
 

@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert'); // JEST // Mocha // --save-dev
 const { main } = require('./main.js');
 
 /*************************************************************************
@@ -6,7 +6,7 @@ const { main } = require('./main.js');
  * Pass in 0, get out 0
  *************************************************************************/
 try {
-    assert.strictEqual(main(0), 0, 'Test 1 Failed'); // Expected Output: TRUE
+    assert.strictEqual(main(0), 0, 'Test 1 Failed'); // Expected Output: PASS
 } catch (err) {
     defaultErrorLog(err)
 }
@@ -16,7 +16,7 @@ try {
  * Pass in 1, get out 1
  *************************************************************************/
 try {
-    assert.strictEqual(main(1), 1, 'Test 2 Failed'); // Expected Output: FALSE
+    assert.strictEqual(main(1), 1, 'Test 2 Failed'); // Expected Output: PASS
 } catch (err) {
     defaultErrorLog(err)
 }
@@ -26,7 +26,7 @@ try {
  * Pass in number, get out number
  *************************************************************************/
 try {
-    assert.strictEqual(typeof main(0), typeof 5, 'Test 3 Failed'); // Expected Output: TRUE
+    assert.strictEqual(typeof main(0), typeof 5, 'Test 3 Failed'); // Expected Output: PASS
 } catch (err) {
     defaultErrorLog(err)
 }
