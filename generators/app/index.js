@@ -5,6 +5,7 @@ const proc = require('child_process');
 const moment = require('moment');
 const url = require('url');
 const baseUrl = 'https://github.com/byuitechops/';
+const makePackageJson = require('./makePackageJson.js')
 module.exports = class ByuiTechOpsGenerator extends Generator {
 
   constructor(args, opts) {
@@ -24,7 +25,9 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
   }
 
   initializing() {
-
+    //TODO: Make decisions based on whether this is new or existing.
+    //TODO: Read in Package.json
+    //TODO: show defaults when they exist
   }
 
   prompting() {
@@ -45,33 +48,10 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     this.answers.keywords = this.answers.keywords.split(',');
 
     //Package.json template
-    this.packageJson = {
-      name: this.answers.repoName,
-      version: this.answers.version,
-      description: this.answers.description,
-      main: this.answers.entryPoint,
-      scripts: {},
-      repository: {
-        type: "git",
-        url: this.answers.repositoryLink
-      },
-      keywords: this.answers.keywords,
-      bugs: {
-        url: `${this.answers.repositoryLink}/issues`
-      },
-      homepage: `${this.answers.repositoryLink}#readme`,
-      dependencies: {},
-      author: this.answers.author,
-      license: "MIT",
-      devDependencies: {},
-      repository: `byuitechops/${this.answers.repoName}`,
-      byui: {
-        projectPurpose: this.answers.purpose,
-        projectStakeholders: this.answers.stakeholders,
-        projectSize: this.answers.size,
-        timeCreated: this.answers.timeCreated
-      }
-    }
+    //TODO: Make a new module where the package.Json file lives.
+    //TODO: Remove github links?  if you run npm init, then the 
+    //TODO: maybe look into NPM init somemore
+    this.packageJson = makePackageJson(this.answers);
   }
 
   //Default (other methods are run here)
@@ -91,6 +71,8 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       this.answers
     );
 
+      //TODO: make a function that determines if the project is new or no... 
+      //TODO: if a readme exists, leave it, and don't create an new one.
     //Write package.json
     this.fs.writeJSON(`${this.answers.repoName}/package.json`, this.packageJson);
 
