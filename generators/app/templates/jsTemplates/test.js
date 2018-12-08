@@ -1,21 +1,13 @@
-<<<<<<< HEAD:TORYAN/test.js
-const assert = require('assert'); // JEST // Mocha // --save-dev
-const { main } = require('./main.js');
-=======
+
 const assert = require('assert');
 const { main } = require('./<%= entryPoint %>');
->>>>>>> 60426398ff0683391bdfbdb426d1cb25f492056e:generators/app/templates/test.js
 
 /*************************************************************************
  * Test Description
  * Pass in 0, get out 0
  *************************************************************************/
 try {
-<<<<<<< HEAD:TORYAN/test.js
-    assert.strictEqual(main(0), 0, 'Test 1 Failed'); // Expected Output: PASS
-=======
   assert.strictEqual(main(0), 0, 'Test 1 Failed'); // Expected Output: TRUE
->>>>>>> 60426398ff0683391bdfbdb426d1cb25f492056e:generators/app/templates/test.js
 } catch (err) {
   defaultErrorLog(err)
 }
@@ -25,11 +17,7 @@ try {
  * Pass in 1, get out 1
  *************************************************************************/
 try {
-<<<<<<< HEAD:TORYAN/test.js
-    assert.strictEqual(main(1), 1, 'Test 2 Failed'); // Expected Output: PASS
-=======
   assert.strictEqual(main(1), 1, 'Test 2 Failed'); // Expected Output: FALSE
->>>>>>> 60426398ff0683391bdfbdb426d1cb25f492056e:generators/app/templates/test.js
 } catch (err) {
   defaultErrorLog(err)
 }
@@ -39,11 +27,7 @@ try {
  * Pass in number, get out number
  *************************************************************************/
 try {
-<<<<<<< HEAD:TORYAN/test.js
-    assert.strictEqual(typeof main(0), typeof 5, 'Test 3 Failed'); // Expected Output: PASS
-=======
   assert.strictEqual(typeof main(0), typeof 5, 'Test 3 Failed'); // Expected Output: TRUE
->>>>>>> 60426398ff0683391bdfbdb426d1cb25f492056e:generators/app/templates/test.js
 } catch (err) {
   defaultErrorLog(err)
 }

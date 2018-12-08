@@ -10,12 +10,33 @@ function noBlank(input, answerHash) {
   else return 'this cannot be left blank!';
 }
 
+module.exports = function(packageJson) {
+
+var newQuestion = {
+  name: 'isNew',
+  type: 'confirm',
+  message: messagePadEnd('Is this a new Project?'),
+  suffix: ':',
+  validate: noBlank,
+  default: true
+};
+
 var titleQuestion = {
   name: 'title',
   type: 'input',
   message: messagePadEnd('Project Name'),
   suffix: ':',
   validate: noBlank,
+
+};
+
+var repositoryNameQuestion = {
+  name: 'repositoryName',
+  type: 'input',
+  message: messagePadEnd('Enter EXACT name of your Repository Please Manually Verify'),
+  suffix: ':',
+  validate: noBlank,
+  when: (answerHash) => answerHash.isNew,
   default: (answerHash) => {
     if (thisFolderInfo.isGitRepository()) {
       return thisFolderInfo.currentDirName();
@@ -33,16 +54,6 @@ var versionQuestion = {
   default: "1.0.0"
 };
 
-var entryPointQuestion = {
-  name: 'entryPoint',
-  type: 'input',
-  message: messagePadEnd('Entry Point:'),
-  suffix: ':',
-  validate: noBlank,
-  default: "main.js",
-  //add the .js extension if it has not been provided.
-  filter: (input) => /.js/.test(input) ? input : input + ".js"
-};
 var authorQuestion = {
   name: 'author',
   type: 'input',
@@ -148,10 +159,11 @@ var sizeQuestion = {
   filter: (input) => sizePromptToValueAdapter[input]
 };
 
-module.exports = [
+return [
+  newQuestion,
   titleQuestion,
+  repositoryNameQuestion,
   versionQuestion,
-  entryPointQuestion,
   authorQuestion,
   hasParentProjectQuestion,
   parentProjectQuestion,
@@ -165,6 +177,7 @@ module.exports = [
   sizeQuestion,
 ];
 
+}
 /*Other questions we can add from 'npm init':
  test command: (didn't add this question)
 License:  (defaulted to MIT so not asking this question)

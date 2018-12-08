@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "test",
+  "main": "testingChildProc.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "tes"
+  },
+  "keywords": [
+    "tes",
+    "test"
+  ],
+  "author": "ryan",
+  "license": "ISC"
+}
