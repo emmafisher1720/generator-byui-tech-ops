@@ -73,7 +73,6 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       fs.readFile('./package.json', 'utf8', function (err, data) {
         thisContext.packageJson = JSON.parse(data);
       });
-
     });
   }
 
@@ -95,6 +94,8 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     this.answers.parentProjectDescription = this.answers.hasParentProject ? `\nThis is part of the [${this.answers.parentProject}](${this.answers.parentProjectLink}) project.\n` : '';
     this.answers.timeCreated = moment().format('YYYY MMMM DD, hh:mm A');
     this.answers.keywords = this.answers.keywords.split(',');
+
+    //Here is where you need to append the read in json (at this.packageJson) to the additional values that you gather from the questions from the cliPrompts
 
     //TODO: Remove github links?  if you run npm init, then the 
     //TODO: maybe look into NPM init somemore
