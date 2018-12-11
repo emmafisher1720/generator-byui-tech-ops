@@ -48,7 +48,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
       npmInit.on('exit', function (code, signal) {
         if (code === 0) {
-          success('');
+          success(thisContext);
         } else if (code === 1) {
           //If the user says 'no' to the generated package.json file
           thisContext.log(chalk.yellowBright("Since you didn't like that package.json, let's try again!\n"));
@@ -69,7 +69,12 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
     //TODO: show defaults when they exist
 
-    return this._runNpmInit(this);
+    return this._runNpmInit(this).then((thisContext) => {
+      fs.readFile('./package.json', 'utf8', function (err, data) {
+        thisContext.packageJson = JSON.parse(data);
+      });
+
+    });
   }
 
   prompting() {
@@ -93,7 +98,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
     //TODO: Remove github links?  if you run npm init, then the 
     //TODO: maybe look into NPM init somemore
-    this.packageJson = makePackageJson(this.answers);
+    // this.packageJson = makePackageJson(this.answers);
   }
 
   //Default (other methods are run here)
@@ -112,7 +117,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
     //TODO: if a readme exists, leave it, and don't create an new one.
     //Write package.json
-    this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
+    // this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
 
     //Write README.md file
     this.fs.copyTpl(
