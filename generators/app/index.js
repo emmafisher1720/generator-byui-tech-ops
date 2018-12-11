@@ -4,6 +4,7 @@ const Generator = require('yeoman-generator');
 const proc = require('child_process');
 const moment = require('moment');
 const url = require('url');
+const chalk = require('chalk');
 const baseUrl = 'https://github.com/byuitechops/';
 const makePackageJson = require('./makePackageJson.js');
 //Not to be confused with this.fs
@@ -12,6 +13,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
   constructor(args, opts) {
     super(args, opts);
+    this.option('new');
   }
 
   //Only gets called if this is a new project
@@ -29,27 +31,51 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
   //
   _setUpDestinationFolder(filename) {
-    return (this.answers.isNew) ? `${this.answers.repositoryName}/${filename}` : filename;
+    return (this.options.new) ? `${this.answers.repositoryName}/${filename}` : filename;
+  }
+
+  _runNpmInit(thisContext) {
+    return new Promise(function (success, fail) {
+      thisContext.log(chalk.yellowBright("---------- Running NPM INIT -----------"));
+      var npmInit = proc.spawn('npm init', {
+        stdio: ['inherit', null, 'inherit'],
+        shell: true
+      });
+
+      npmInit.stdout.on('data', function (data) {
+        process.stdout.write(data.toString());
+      });
+
+      npmInit.on('exit', function (code, signal) {
+        if (code === 0) {
+          success('');
+        } else if (code === 1) {
+          //If the user says 'no' to the generated package.json file
+          thisContext.log(chalk.yellowBright("Since you didn't like that package.json, let's try again!\n"));
+          thisContext._runNpmInit(thisContext);
+        }
+
+      });
+
+    });
   }
 
   initializing() {
-    //TODO: Make decisions based on whether this is new or existing. fs.readDir
-    //TODO: Read in Package.json if exists. this.packageJson
-    //if the package Json doesn't exist, create an empty packageJson object
+    // fs.readdir('./', function (err, files) {
+    //   var expectedFiles = ['package.json', 'README.md', 'PROJECTINFO.md'];
+    //   //Check for README
 
-    fs.readdir('./', function (err, files) {
-      var expectedFiles = ['package.json', 'README.md', 'PROJECTINFO.md'];
-      //Check for README
-
-      //Check for Package.Json
-
-    });
+    // });
 
     //TODO: show defaults when they exist
+
+    return this._runNpmInit(this);
   }
 
   prompting() {
-    return this.prompt(cliPrompts(this.packageJson))
+    //Make the _cliPrompts method a class method. (This allows us to have class access from within cliPrompts)
+    this._cliPrompts = cliPrompts;
+    return this.prompt(this._cliPrompts())
       .then(answers => {
         this.answers = answers;
       });
@@ -80,41 +106,41 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     //Write PROJECTINFO.md
     this.fs.copyTpl(
       this.templatePath('PROJECTINFO.md'),
-      this.destinationPath(_setUpDestinationFolder('PROJECTINFO.md')),
+      this.destinationPath(this._setUpDestinationFolder('PROJECTINFO.md')),
       this.answers
     );
 
     //TODO: if a readme exists, leave it, and don't create an new one.
     //Write package.json
-    this.fs.writeJSON(_setUpDestinationFolder('package.json'), this.packageJson);
+    this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
 
     //Write README.md file
     this.fs.copyTpl(
       this.templatePath('README.md'),
-      this.destinationPath(_setUpDestinationFolder('README.md')),
+      this.destinationPath(this._setUpDestinationFolder('README.md')),
       this.answers
     );
 
     //Only generate the following boilerplate code for new projects
-    if (this.answers.isNew) {
+    if (this.options.new) {
       //Write main.js file
       this.fs.copyTpl(
-        this.templatePath('main.js'),
-        this.destinationPath(_setUpDestinationFolder('main.js')),
+        this.templatePath(`jsTemplates/${this.answers.jsTemplate}/main.js`),
+        this.destinationPath(this._setUpDestinationFolder('main.js')),
         this.answers
       );
 
       //Write bin.js file
       this.fs.copyTpl(
-        this.templatePath('bin.js'),
-        this.destinationPath(_setUpDestinationFolder('bin.js')),
+        this.templatePath(`jsTemplates/${this.answers.jsTemplate}/bin.js`),
+        this.destinationPath(this._setUpDestinationFolder('bin.js')),
         this.answers
       );
 
       //Write test.js file
       this.fs.copyTpl(
-        this.templatePath('test.js'),
-        this.destinationPath(_setUpDestinationFolder('test.js')),
+        this.templatePath(`jsTemplates/${this.answers.jsTemplate}/test.js`),
+        this.destinationPath(this._setUpDestinationFolder('test.js')),
         this.answers
       );
     }
