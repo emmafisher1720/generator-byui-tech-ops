@@ -6,7 +6,9 @@ const { main } = require('./main.js');
  * Pass in 0, get out 0
  *************************************************************************/
 async function test1 () {
-    Promise.resolve( assert.strictEqual(await main(0), 0, 'Test 1 Failed') )
+    Promise.resolve( 
+        assert.strictEqual(await main(0), 0, 'Test 1 Failed') 
+    )
     .catch(defaultErrorLog);
 }
 
@@ -15,7 +17,9 @@ async function test1 () {
  * Pass in 1, get out 1
  *************************************************************************/
 async function test2() {
-    Promise.resolve(assert.strictEqual(await main(0), 0, 'Test 1 Failed'))
+    Promise.resolve(
+        assert.strictEqual(await main(0), 0, 'Test 1 Failed')
+    )
     .catch(defaultErrorLog);
 }
 

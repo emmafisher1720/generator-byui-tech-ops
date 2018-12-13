@@ -17,9 +17,7 @@ async function handleError (error) {
 }
 
 (async function () {
-    Promise
-    .resolve (getInput)
-    .then    (main)
-    .then    (getOutput)
-    .catch   (handleError);
-})();
+    await getInput ()
+    await main ()
+    await getOutput ()
+})().catch(handleError);

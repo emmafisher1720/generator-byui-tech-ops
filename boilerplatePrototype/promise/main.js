@@ -3,17 +3,17 @@
  *************************************************************************/
 module.exports = {
     async main (args) {
+        // await / no await
+        await supportingFunction1();
+        await supportingFunction2();
+        await supportingFunction3();
+        return args;
         // Promise.resolve
         return await Promise.resolve ( args )
         .then ( supportingFunction1 )
         .then ( supportingFunction2 )
         .then ( supportingFunction3 )
         .catch ( errorHandling );
-        // await / no await
-        await supportingFunction1();
-        await supportingFunction2();
-        await supportingFunction3();
-        return args;
         // Promise.all, arrayed output
         return Promise.all([
             supportingFunction1(),
