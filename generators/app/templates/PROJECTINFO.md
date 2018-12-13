@@ -1,5 +1,5 @@
 # <%= title %>
-[Go to the Repository](https://github.com/byuitechops/<%= repositoryName %>)
+[Go to the Repository](<%= repositoryLink %>)
 <%= parentProjectDescription %>
 **Description**
 > <%= description %>

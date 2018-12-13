@@ -1,4 +1,5 @@
 const thisFolderInfo = require('./thisFolderInfo.js');
+const chalk = require('chalk');
 
 function messagePadEnd(string) {
   let padding = 33;
@@ -12,94 +13,34 @@ function noBlank(input, answerHash) {
 
 module.exports = function () {
 
-  var titleQuestion = {
-    name: 'title',
-    type: 'input',
-    message: messagePadEnd('Project Name'),
-    suffix: ':',
-    validate: noBlank,
+  // --------------  OVERALL QUESTIONS -----------------
 
-  };
-
-  var repositoryNameQuestion = {
-    name: 'repositoryName',
-    type: 'input',
-    message: messagePadEnd('Enter EXACT name of your Repository Please Manually Verify'),
-    suffix: ':',
-    validate: noBlank,
-    when: () => this.options.new,
-    default: (answerHash) => {
-      if (thisFolderInfo.isGitRepository()) {
-        return thisFolderInfo.currentDirName();
-      }
-      return;
-    }
-  };
-
-  var versionQuestion = {
-    name: 'version',
-    type: 'input',
-    message: messagePadEnd('Version:'),
-    suffix: ':',
-    validate: noBlank,
-    default: "1.0.0"
-  };
-
+  /*Why am I asking the author question again when it has been asked by npm init?
+    Two reasons: 
+      1. NPM init does not enforce that this field be filled out, and this does.
+      2. For an existing project, npm init will not prompt for the author if a 
+         value already exists in the package.json for the author. This gives us the
+         opporunity to review who the author is, and decide if a change is needed.
+  */
   var authorQuestion = {
     name: 'author',
     type: 'input',
-    message: messagePadEnd('Who will author the code'),
+    message: messagePadEnd('Verify Author'),
     suffix: ':',
     validate: noBlank,
+    default: this.packageJson.author
   };
 
-  var hasParentProjectQuestion = {
-    name: 'hasParentProject',
-    type: 'confirm',
-    message: messagePadEnd('Is this a child-repository?'),
-    suffix: ':',
-    default: false,
-  };
-
-  var parentProjectQuestion = {
-    name: 'parentProject',
-    type: 'input',
-    message: messagePadEnd('Exact name of parent repository'),
-    suffix: ':',
-    when: (answerHash) => answerHash.hasParentProject,
-    validate: noBlank,
-  };
-
-  var installInstructionsQuestion = {
-    name: 'installInstructions',
-    type: 'input',
-    message: messagePadEnd('Installation Instructions'),
-    suffix: ':',
-    validate: noBlank,
-  };
-
-  var runRequirementsQuestion = {
-    name: 'runRequirements',
-    type: 'input',
-    message: messagePadEnd('Run Requirements'),
-    suffix: ':',
-    validate: noBlank,
-  };
-
-  var processQuestion = {
-    name: 'process',
-    type: 'input',
-    message: messagePadEnd('Process'),
-    suffix: ':',
-    validate: noBlank,
-  };
-
+  /*Why am I asking the description question again when it has been asked by npm init?
+    For the same two reasons why I asked for the author again.  (See explanation above.)
+  */
   var descriptionQuestion = {
     name: 'description',
     type: 'editor',
-    message: messagePadEnd('Project Description (What)'),
+    message: messagePadEnd('Verify Project Description'),
     suffix: ':',
     validate: noBlank,
+    default: this.packageJson.description
   };
 
   var purposeQuestion = {
@@ -114,14 +55,6 @@ module.exports = function () {
     name: 'stakeholders',
     type: 'input',
     message: messagePadEnd('Project Stakeholders'),
-    suffix: ':',
-    validate: noBlank,
-  };
-
-  var keywordsQuestion = {
-    name: 'keywords',
-    type: 'input',
-    message: messagePadEnd('List keywords separated by commas'),
     suffix: ':',
     validate: noBlank,
   };
@@ -150,6 +83,86 @@ module.exports = function () {
     filter: (input) => sizePromptToValueAdapter[input]
   };
 
+  // ---------------------------------------------------------
+
+  //---------------  PARENT PROJECT QUESTIONS ----------------
+  var hasParentProjectQuestion = {
+    name: 'hasParentProject',
+    type: 'confirm',
+    message: messagePadEnd('Is this a child-repository?'),
+    suffix: ':',
+    default: false,
+  };
+
+  var parentProjectQuestion = {
+    name: 'parentProject',
+    type: 'list',
+    message: messagePadEnd('What is the parent project?'),
+    suffix: ':',
+    choices: this.parentOptions,
+    when: (answerHash) => answerHash.hasParentProject,
+    validate: noBlank,
+  };
+
+  var parentProjectInputQuestion = {
+    name: 'parentProject',
+    type: 'input',
+    message: messagePadEnd('Enter EXACT name of parent project (see repo)'),
+    suffix: ':',
+    when: (answerHash) => answerHash.parentProject == 'other',
+    validate: noBlank,
+  }
+  // ---------------------------------------------------------
+
+  var installInstructionsQuestion = {
+    name: 'installInstructions',
+    type: 'input',
+    message: messagePadEnd('Installation Instructions'),
+    suffix: ':',
+    validate: noBlank,
+  };
+
+  var runRequirementsQuestion = {
+    name: 'runRequirements',
+    type: 'input',
+    message: messagePadEnd('Run Requirements'),
+    suffix: ':',
+    validate: noBlank,
+  };
+
+  var processQuestion = {
+    name: 'process',
+    type: 'input',
+    message: messagePadEnd('Process'),
+    suffix: ':',
+    validate: noBlank,
+  };
+
+  var addAdditionalKeywordsQuestion = {
+    name: 'addKeywords',
+    type: 'confirm',
+    message: messagePadEnd(`Add more keywords? (${this.packageJson.keywords ? this.packageJson.keywords.join(',') : ''})`),
+    suffix: ':',
+    validate: noBlank,
+    default: false
+  }
+
+  var keywordsQuestion = {
+    name: 'keywords',
+    type: 'input',
+    message: messagePadEnd('List keywords to add separated by commas'),
+    suffix: ':',
+    validate: noBlank,
+    when: (answerHash) => answerHash.addKeywords,
+    //TODO: fix the keywords filter.
+    //This filter gives an error.
+    // filter: (input) => {
+    //   return this.packageJson.keywords.concat(input.split(','));
+    // }
+  };
+
+
+
   var jsTemplateQuestion = {
     name: 'jsTemplate',
     type: 'list',
@@ -160,21 +173,29 @@ module.exports = function () {
   };
 
   return [
-    titleQuestion,
-    repositoryNameQuestion,
-    versionQuestion,
+
+    /* Overall Questions */
     authorQuestion,
-    hasParentProjectQuestion,
-    parentProjectQuestion,
-    installInstructionsQuestion,
-    runRequirementsQuestion,
-    processQuestion,
     descriptionQuestion,
     purposeQuestion,
     stakeholdersQuestion,
-    keywordsQuestion,
     sizeQuestion,
-    jsTemplateQuestion
+
+    /* Parent Project Questions */
+    hasParentProjectQuestion,
+    parentProjectQuestion,
+    parentProjectInputQuestion,
+
+
+    installInstructionsQuestion,
+    runRequirementsQuestion,
+    processQuestion,
+    addAdditionalKeywordsQuestion,
+    keywordsQuestion,
+
+    /*   Code Set-up Questions */
+    jsTemplateQuestion,
+
   ];
 
 }

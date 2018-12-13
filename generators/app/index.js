@@ -1,32 +1,27 @@
 'use strict';
-const cliPrompts = require('./cliPrompts.js');
 const Generator = require('yeoman-generator');
 const proc = require('child_process');
-const moment = require('moment');
-const url = require('url');
 const chalk = require('chalk');
-const baseUrl = 'https://github.com/byuitechops/';
-const makePackageJson = require('./makePackageJson.js');
-//Not to be confused with this.fs
-const fs = require('fs');
+const parentOptions = require('./templates/parentprojects.js');
+const generatorPackageJson = require('../../package.json');
+
 module.exports = class ByuiTechOpsGenerator extends Generator {
+
+  //TODOS:
+  //1. Get the whole thing working round trip!
 
   constructor(args, opts) {
     super(args, opts);
     this.option('new');
-  }
-
-  //Only gets called if this is a new project
-  _setUpRepo(projectTitle) {
-
-    //Get rid of space at the beginning and end
-    var repositoryName = projectTitle.replace(/^\s+/g, '').replace(/\s+$/g, '');
-    //Replace spaces inbetween words with '-'
-    repositoryName = repositoryName.toLowerCase().replace(/\s+/g, '-');
-
-    //Create the folder that will hold all the files
-    proc.exec(`mkdir ${repositoryName}`);
-    return repositoryName;
+    this.parentOptions = parentOptions;
+    //Make the _cliPrompts method a class method. (This allows us to have class access from within cliPrompts)
+    this._cliPrompts = require('./cliPrompts.js');
+    this._updatePackageJsonObject = require('./updatePackageJsonObject.js');
+    this._updateAnswersObject = require('./updateAnswersObject.js');
+    //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
+    //command was called.
+    this.destinationRoot(this.contextRoot);
+    this.generatorVersion = generatorPackageJson.version;
   }
 
   //
@@ -34,9 +29,8 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     return (this.options.new) ? `${this.answers.repositoryName}/${filename}` : filename;
   }
 
-  _runNpmInit(thisContext) {
+  _runNpmInit() {
     return new Promise(function (success, fail) {
-      thisContext.log(chalk.yellowBright("---------- Running NPM INIT -----------"));
       var npmInit = proc.spawn('npm init', {
         stdio: ['inherit', null, 'inherit'],
         shell: true
@@ -47,38 +41,45 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       });
 
       npmInit.on('exit', function (code, signal) {
-        if (code === 0) {
-          success(thisContext);
-        } else if (code === 1) {
-          //If the user says 'no' to the generated package.json file
-          thisContext.log(chalk.yellowBright("Since you didn't like that package.json, let's try again!\n"));
-          thisContext._runNpmInit(thisContext);
-        }
-
+        success(code);
       });
 
+      npmInit.on('error', fail);
+
     });
+
+
   }
 
-  initializing() {
+  async initializing() {
     // fs.readdir('./', function (err, files) {
     //   var expectedFiles = ['package.json', 'README.md', 'PROJECTINFO.md'];
     //   //Check for README
 
     // });
+    var that = this;
+    try {
+      var code = 1;
+      do {
+        this.log(chalk.yellowBright("---------- Running NPM INIT -----------"));
+        code = await this._runNpmInit();
+      } while (code === 1);
+    } catch (e) {
+      //Handle errors here
+    }
 
-    //TODO: show defaults when they exist
+    try {
+      this.packageJson = require(`${this.contextRoot}/package.json`);
+    } catch (e) {
+      //Handle errors
+    }
 
-    return this._runNpmInit(this).then((thisContext) => {
-      fs.readFile('./package.json', 'utf8', function (err, data) {
-        thisContext.packageJson = JSON.parse(data);
-      });
-    });
   }
 
   prompting() {
-    //Make the _cliPrompts method a class method. (This allows us to have class access from within cliPrompts)
-    this._cliPrompts = cliPrompts;
+    this.log(this.packageJson);
+    //Let the user know we are starting
+    this.log(chalk.yellowBright("--------- Begin Custom Questionaire ---------"));
     return this.prompt(this._cliPrompts())
       .then(answers => {
         this.answers = answers;
@@ -86,28 +87,20 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
   }
 
   configuring() {
-    //Add the following to our answers object
-    //Need to test this line
-    this.answers.repositoryName = (this.answers.repositoryName) ? this.answers.repositoryName : this._setUpRepo(this.answers.title);
-    this.answers.repositoryLink = new url.URL(this.answers.repositoryName, baseUrl).href;
-    this.answers.parentProjectLink = new url.URL(this.answers.parentProject, baseUrl).href;
-    this.answers.parentProjectDescription = this.answers.hasParentProject ? `\nThis is part of the [${this.answers.parentProject}](${this.answers.parentProjectLink}) project.\n` : '';
-    this.answers.timeCreated = moment().format('YYYY MMMM DD, hh:mm A');
-    this.answers.keywords = this.answers.keywords.split(',');
+    //Update the answers object
+    this._updateAnswersObject();
 
-    //Here is where you need to append the read in json (at this.packageJson) to the additional values that you gather from the questions from the cliPrompts
+    //Update the package.json object
+    this._updatePackageJsonObject();
 
-    //TODO: Remove github links?  if you run npm init, then the 
-    //TODO: maybe look into NPM init somemore
-    // this.packageJson = makePackageJson(this.answers);
   }
 
-  //Default (other methods are run here)
-
   writing() {
-    //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
-    //command was called.
-    this.destinationRoot(this.contextRoot);
+
+    //Create a new directory if the --new flag is found
+    if (this.options.new) {
+      proc.exec(`mkdir ${this.answers.repositoryName}`);
+    }
 
     //Write PROJECTINFO.md
     this.fs.copyTpl(
@@ -118,7 +111,8 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
     //TODO: if a readme exists, leave it, and don't create an new one.
     //Write package.json
-    // this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
+    //TODO: We need to rewrite the package.json after we have updated it.
+    this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
 
     //Write README.md file
     this.fs.copyTpl(
