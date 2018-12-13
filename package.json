@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "This generator will help us create documents for projects",
   "homepage": "https://github.com/byuitechops/generator-byui-tech-ops#readme",
-  "author": "Ryan Gewondjan",
+  "author": {
+    "name": "Ryan Gewondjan",
+    "email": "",
+    "url": ""
+  },
   "files": [
     "generators"
   ],
