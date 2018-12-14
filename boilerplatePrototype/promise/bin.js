@@ -1,23 +1,9 @@
-const { main } = require('./main.js');
+const mainIO = require('./mainIO.js');
 
-async function getInput() {
-    var input;
-    // How to get input, eg. from file, commandline, inquierer, etc.
-    return input;
-}
+function runIO (seed) {
+    mainIO(seed);
+};
 
-async function getOutput (output) {
-    // How to output data, eg. to csv, to json, to console, etc.
-    return;
-}
-
-async function handleError (error) {
-    console.error(error)
-    return;
-}
-
-(async function () {
-    await getInput ()
-    await main ()
-    await getOutput ()
-})().catch(handleError);
+( () => {
+    runIO();
+})();
