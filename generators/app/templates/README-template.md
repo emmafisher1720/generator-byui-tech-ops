@@ -1,4 +1,4 @@
-# <%= repoName %>
+# <%= repositoryName %>
 ## Introduction 
 TODO: A brief description of the project
 

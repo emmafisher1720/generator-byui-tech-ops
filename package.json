@@ -1,8 +1,8 @@
 {
   "name": "generator-byui-tech-ops",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "This generator will help us create documents for projects",
-  "homepage": "",
+  "homepage": "https://github.com/byuitechops/generator-byui-tech-ops#readme",
   "author": {
     "name": "Ryan Gewondjan",
     "email": "",
@@ -13,7 +13,6 @@
   ],
   "main": "generators/index.js",
   "keywords": [
-    "",
     "yeoman-generator"
   ],
   "devDependencies": {
@@ -70,6 +69,13 @@
     "pretest": "eslint .",
     "test": "jest"
   },
-  "repository": "byuitechops/generator-byui-tech-ops",
-  "private": true
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/byuitechops/generator-byui-tech-ops.git"
+  },
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/byuitechops/generator-byui-tech-ops/issues"
+  },
+  "license": "ISC"
 }

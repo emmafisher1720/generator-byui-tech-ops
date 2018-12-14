@@ -1,108 +1,149 @@
 'use strict';
-const cliPrompts = require('./cliPrompts.js');
 const Generator = require('yeoman-generator');
 const proc = require('child_process');
-const moment = require('moment');
-const url = require('url');
-const baseUrl = 'https://github.com/byuitechops/';
-const makePackageJson = require('./makePackageJson.js')
+const chalk = require('chalk');
+const parentOptions = require('./templates/parentprojects.js');
+const generatorPackageJson = require('../../package.json');
+
 module.exports = class ByuiTechOpsGenerator extends Generator {
+
+  //TODOS:
+  //1. Get the whole thing working round trip!
 
   constructor(args, opts) {
     super(args, opts);
+    this.option('new');
+    this.parentOptions = parentOptions;
+    //Make the _cliPrompts method a class method. (This allows us to have class access from within cliPrompts)
+    this._cliPrompts = require('./cliPrompts.js');
+    this._updatePackageJsonObject = require('./updatePackageJsonObject.js');
+    this._updateAnswersObject = require('./updateAnswersObject.js');
+    //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
+    //command was called.
+    this.destinationRoot(this.contextRoot);
+    this.generatorVersion = generatorPackageJson.version;
   }
 
-  _setUpRepo(projectTitle) {
-
-    //Get rid of space at the beginning and end
-    var repoName = projectTitle.replace(/^\s+/g, '').replace(/\s+$/g, '');
-    //Replace spaces inbetween words with '-'
-    repoName = repoName.toLowerCase().replace(/\s+/g, '-');
-
-    //Create the folder that will hold all the files
-    proc.exec(`mkdir ${repoName}`);
-    return repoName;
+  //
+  _setUpDestinationFolder(filename) {
+    return (this.options.new) ? `${this.answers.repositoryName}/${filename}` : filename;
   }
 
-  initializing() {
-    //TODO: Make decisions based on whether this is new or existing.
-    //TODO: Read in Package.json
-    //TODO: show defaults when they exist
+  _runNpmInit() {
+    return new Promise(function (success, fail) {
+      var npmInit = proc.spawn('npm init', {
+        stdio: ['inherit', null, 'inherit'],
+        shell: true
+      });
+
+      npmInit.stdout.on('data', function (data) {
+        process.stdout.write(data.toString());
+      });
+
+      npmInit.on('exit', function (code, signal) {
+        success(code);
+      });
+
+      npmInit.on('error', fail);
+
+    });
+
+
+  }
+
+  async initializing() {
+    // fs.readdir('./', function (err, files) {
+    //   var expectedFiles = ['package.json', 'README.md', 'PROJECTINFO.md'];
+    //   //Check for README
+
+    // });
+    var that = this;
+    try {
+      var code = 1;
+      do {
+        this.log(chalk.yellowBright("---------- Running NPM INIT -----------"));
+        code = await this._runNpmInit();
+      } while (code === 1);
+    } catch (e) {
+      //Handle errors here
+    }
+
+    try {
+      this.packageJson = require(`${this.contextRoot}/package.json`);
+    } catch (e) {
+      //Handle errors
+    }
+
   }
 
   prompting() {
-    return this.prompt(cliPrompts)
+    this.log(this.packageJson);
+    //Let the user know we are starting
+    this.log(chalk.yellowBright("--------- Begin Custom Questionaire ---------"));
+    return this.prompt(this._cliPrompts())
       .then(answers => {
-        // To access props later use this.props.someAnswer;
         this.answers = answers;
       });
   }
 
   configuring() {
-    //Add the following to our answers object
-    this.answers.repoName = this._setUpRepo(this.answers.title);
-    this.answers.repositoryLink = new url.URL(this.answers.repoName, baseUrl).href;
-    this.answers.parentProjectLink = new url.URL(this.answers.parentProject, baseUrl).href;
-    this.answers.parentProjectDescription = this.answers.hasParentProject ? `\nThis is part of the [${this.answers.parentProject}](${this.answers.parentProjectLink}) project.\n` : '';
-    this.answers.timeCreated = moment().format('YYYY MMMM DD, hh:mm A');
-    this.answers.keywords = this.answers.keywords.split(',');
+    //Update the answers object
+    this._updateAnswersObject();
 
-    //Package.json template
-    //TODO: Make a new module where the package.Json file lives.
-    //TODO: Remove github links?  if you run npm init, then the 
-    //TODO: maybe look into NPM init somemore
-    this.packageJson = makePackageJson(this.answers);
+    //Update the package.json object
+    this._updatePackageJsonObject();
+
   }
 
-  //Default (other methods are run here)
-
   writing() {
-    //This note from: https://yeoman.io/authoring/file-system.html
-    //"The destination context is defined as either the current working directory or the closest parent folder containing a .yo-rc.json file."
 
-    //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
-    //command was called.
-    this.destinationRoot(this.contextRoot);
+    //Create a new directory if the --new flag is found
+    if (this.options.new) {
+      proc.exec(`mkdir ${this.answers.repositoryName}`);
+    }
 
     //Write PROJECTINFO.md
     this.fs.copyTpl(
       this.templatePath('PROJECTINFO.md'),
-      this.destinationPath(`${this.answers.repoName}/PROJECTINFO.md`),
+      this.destinationPath(this._setUpDestinationFolder('PROJECTINFO.md')),
       this.answers
     );
 
-      //TODO: make a function that determines if the project is new or no... 
-      //TODO: if a readme exists, leave it, and don't create an new one.
+    //TODO: if a readme exists, leave it, and don't create an new one.
     //Write package.json
-    this.fs.writeJSON(`${this.answers.repoName}/package.json`, this.packageJson);
+    //TODO: We need to rewrite the package.json after we have updated it.
+    this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
 
-    //Write main.js file
-    this.fs.copyTpl(
-      this.templatePath('main.js'),
-      this.destinationPath(`${this.answers.repoName}/${this.answers.entryPoint}`),
-      this.answers
-    );
-
-    //Write entry.js file
-    this.fs.copyTpl(
-      this.templatePath('entry.js'),
-      this.destinationPath(`${this.answers.repoName}/entry.js`),
-      this.answers
-    );
-
-    //Write entry.js file
-    this.fs.copyTpl(
-      this.templatePath('test.js'),
-      this.destinationPath(`${this.answers.repoName}/test.js`),
-      this.answers
-    );
-
+    //Write README.md file
     this.fs.copyTpl(
       this.templatePath('README.md'),
-      this.destinationPath(`${this.answers.repoName}/README.md`),
+      this.destinationPath(this._setUpDestinationFolder('README.md')),
       this.answers
     );
 
+    //Only generate the following boilerplate code for new projects
+    if (this.options.new) {
+      //Write main.js file
+      this.fs.copyTpl(
+        this.templatePath(`jsTemplates/${this.answers.jsTemplate}/main.js`),
+        this.destinationPath(this._setUpDestinationFolder('main.js')),
+        this.answers
+      );
+
+      //Write bin.js file
+      this.fs.copyTpl(
+        this.templatePath(`jsTemplates/${this.answers.jsTemplate}/bin.js`),
+        this.destinationPath(this._setUpDestinationFolder('bin.js')),
+        this.answers
+      );
+
+      //Write test.js file
+      this.fs.copyTpl(
+        this.templatePath(`jsTemplates/${this.answers.jsTemplate}/test.js`),
+        this.destinationPath(this._setUpDestinationFolder('test.js')),
+        this.answers
+      );
+    }
 
   }
 
@@ -110,13 +151,13 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     //Handle conflicts
   }
 
-  // install() {
-  //   this.installDependencies();
-  // }
+  install() {
+    // this.installDependencies();
+  }
 
   end() {
     //this.log("in end method");
-    //proc.exec(`cd ${this.repoName}`)
+    //proc.exec(`cd ${this.repositoryName}`)
   }
 
 };
