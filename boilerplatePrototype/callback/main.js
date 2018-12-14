@@ -2,11 +2,11 @@
  * Module Description
  *************************************************************************/
 module.exports = {
-    main (args) {
+    main (data, callback) {
         supportingFunction1 ();
         supportingFunction2 ();
         supportingFunction3 ();
-        return args;
+        return callback (null, data);
     }
 };
 

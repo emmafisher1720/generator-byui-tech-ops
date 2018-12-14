@@ -1,18 +1,45 @@
+/************************************************************************* 
+ * Libraries / Requires / Constants
+ *************************************************************************/
 const { main } = require('./main.js');
 
-function getInput() {
+/************************************************************************* 
+ * Input Function. If it is complicated, consider abstracting it to a 
+ * seperate file.
+ *************************************************************************/
+function getInput(data, callback) {
     var input;
     // How to get input, eg. from file, commandline, inquierer, etc.
-    return input;
+    return callback (null, input);
 }
 
-function getOutput (output) {
+/************************************************************************* 
+ * Output Function. If it is complicated, consider abstracting it to a
+ * seperate file.
+ *************************************************************************/
+function getOutput (data, callback) {
     // How to output data, eg. to csv, to json, to console, etc.
-    return;
+    return callback(null, data);
 }
 
-(function () {
-    const input = getInput();
-    const output = main(input);
-    getOutput(output);
-})()
+/************************************************************************* 
+ * mainIO is where the input and output functions get hooked up to 
+ *************************************************************************/
+function mainIO (seed) {
+    asynclib.waterfall([
+        (callback) => callback (null, seed),
+        getInput,
+        main,
+        getOutput,
+    ], (err, data) => mainOutput = data );
+    // Just in case the module that calls mainIO needs to know the output, return it
+    return mainOutput; 
+}
+
+/************************************************************************* 
+ * Export mainIO to the bin.js or to the next module who needs the logic 
+ * of mainIO during its runtime. Ultimately any io module that needs to
+ * be run on the command line or via `node runFile.js` should be included
+ * as a file in the 'bin' folder. 
+ *************************************************************************/
+module.exports = mainIO;
