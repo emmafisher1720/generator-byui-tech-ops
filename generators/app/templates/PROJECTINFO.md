@@ -1,4 +1,4 @@
-# <%= title %>
+# <%= repositoryName %>
 [Go to the Repository](<%= repositoryLink %>)
 <%= parentProjectDescription %>
 **Description**
@@ -13,5 +13,7 @@
 **Size**
 > <%= size %>
 
+**Requirements**
+<%= requirements %>
 
 This document created: <%= timeCreated %>

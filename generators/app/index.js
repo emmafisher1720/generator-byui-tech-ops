@@ -7,9 +7,6 @@ const generatorPackageJson = require('../../package.json');
 
 module.exports = class ByuiTechOpsGenerator extends Generator {
 
-  //TODOS:
-  //1. Get the whole thing working round trip!
-
   constructor(args, opts) {
     super(args, opts);
     this.option('new');
@@ -18,45 +15,20 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     this._cliPrompts = require('./cliPrompts.js');
     this._updatePackageJsonObject = require('./updatePackageJsonObject.js');
     this._updateAnswersObject = require('./updateAnswersObject.js');
+    this._readInFile = require('./readInFile.js');
+    this._runNpmInit = require('./runNpmInit.js');
     //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
     //command was called.
     this.destinationRoot(this.contextRoot);
     this.generatorVersion = generatorPackageJson.version;
   }
 
-  //
   _setUpDestinationFolder(filename) {
     return (this.options.new) ? `${this.answers.repositoryName}/${filename}` : filename;
   }
 
-  _runNpmInit() {
-    return new Promise(function (success, fail) {
-      var npmInit = proc.spawn('npm init', {
-        stdio: ['inherit', null, 'inherit'],
-        shell: true
-      });
-
-      npmInit.stdout.on('data', function (data) {
-        process.stdout.write(data.toString());
-      });
-
-      npmInit.on('exit', function (code, signal) {
-        success(code);
-      });
-
-      npmInit.on('error', fail);
-
-    });
-
-
-  }
-
   async initializing() {
-    // fs.readdir('./', function (err, files) {
-    //   var expectedFiles = ['package.json', 'README.md', 'PROJECTINFO.md'];
-    //   //Check for README
 
-    // });
     var that = this;
     try {
       var code = 1;
@@ -65,19 +37,26 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
         code = await this._runNpmInit();
       } while (code === 1);
     } catch (e) {
-      //Handle errors here
+      //Error running NPM Init
+      this.log(chalk.red("ERROR: " + e.message));
     }
 
-    try {
-      this.packageJson = require(`${this.contextRoot}/package.json`);
-    } catch (e) {
-      //Handle errors
+    //Read in package.json
+    this._readInFile("packageJson", "package.json");
+
+    //Read in README.md if one exists
+    if (this.fs.exists('README.md')) {
+      this._readInFile("readMe", "README.md");
     }
 
+    //Read in PROJECTINFO.md if one exists
+    if (this.fs.exists('PROJECTINFO.md')) {
+      this._readInFile("projectInfo", "PROJECTINFO.md");
+    }
   }
 
   prompting() {
-    this.log(this.packageJson);
+    this.log(this.readMe);
     //Let the user know we are starting
     this.log(chalk.yellowBright("--------- Begin Custom Questionaire ---------"));
     return this.prompt(this._cliPrompts())
@@ -148,7 +127,8 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
   }
 
   conflicts() {
-    //Handle conflicts
+    //Handle conflicts auto do this
+    // var conflict = new Conflicter(ByuiTechOpsGenerator, false);
   }
 
   install() {
