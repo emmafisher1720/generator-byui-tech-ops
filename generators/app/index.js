@@ -48,16 +48,19 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     //Read in README.md if one exists
     if (this.fs.exists('README.md')) {
       this._readInFile("readMe", "README.md");
+    } else {
+      this.readMe = "";
     }
 
     //Read in PROJECTINFO.md if one exists
     if (this.fs.exists('PROJECTINFO.md')) {
       this._readInFile("projectInfo", "PROJECTINFO.md");
+    } else {
+      this.projectInfo = "";
     }
   }
 
   prompting() {
-    this.log(this.readMe);
     //Let the user know we are starting
     this.log(chalk.yellowBright("--------- Begin Custom Questionaire ---------"));
     return this.prompt(this._cliPrompts())
@@ -94,12 +97,26 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     //TODO: We need to rewrite the package.json after we have updated it.
     this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
 
-    //Write README.md file
-    this.fs.copyTpl(
-      this.templatePath('README.md'),
-      this.destinationPath(this._setUpDestinationFolder('README.md')),
-      this.answers
-    );
+
+
+    //Probably will break this out so that we aren't doing so much work when a readme doesn't exist.
+    if (this.readMe === "" || this.answers.appendReadMe === true) {
+      //Write new README.md file
+      this.fs.copyTpl(
+        this.templatePath('README.md'),
+        this.destinationPath(this._setUpDestinationFolder('README.md')),
+        this.answers
+      );
+
+      //Have not tested this!
+      this.newReadMe = this.fs.read(this._setUpDestinationFolder('README.md'));
+      this.readMe = this.readMe + this.newReadMe;
+      this.fs.write(this._setUpDestinationFolder('README.md'), this.readMe);
+
+      //This doesn't currently delete the temp folder.
+      // proc.spawnSync(`rm ${this._setUpDestinationFolder('temp_README.md')}`);
+
+    }
 
     //Only generate the following boilerplate code for new projects
     if (this.options.new) {

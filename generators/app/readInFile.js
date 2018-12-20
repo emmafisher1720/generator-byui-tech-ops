@@ -10,5 +10,4 @@ module.exports = function (key, fileName) {
     this.log(chalk.red("ERROR: " + e.message));
   }
 
-
 }

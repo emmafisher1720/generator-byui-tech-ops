@@ -1,40 +1,36 @@
 /************************************************************************* 
  * Libraries / Requires / Constants
  *************************************************************************/
-const { main } = require('./main.js');
+const main = require('./main.js');
 
 /************************************************************************* 
  * Input Function
  * If it is complicated, consider abstracting it to a seperate file.
  *************************************************************************/
 function getInput(data, callback) {
-    var input;
-    // How to get input, eg. from file, commandline, inquierer, etc.
-    return callback (null, input);
+  var input;
+  // How to get input, eg. from file, commandline, inquierer, etc.
+  return callback(null, input);
 }
 
 /************************************************************************* 
  * Output Function
  * If it is complicated, consider abstracting it to a seperate file.
  *************************************************************************/
-function getOutput (data, callback) {
-    // How to output data, eg. to csv, to json, to console, etc.
-    return callback(null, data);
+function getOutput(data, callback) {
+  // How to output data, eg. to csv, to json, to console, etc.
+  return callback(null, data);
 }
 
 /************************************************************************* 
  * mainIO is where the input and output functions get hooked up to Main
  *************************************************************************/
-function mainIO (seed) {
-    var mainOutput;
-    asynclib.waterfall([
-        (callback) => callback (null, seed),
-        getInput,
-        main,
-        getOutput,
-    ], (err, data) => mainOutput = data );
-    // Just in case the module that calls mainIO needs to know the output, return it
-    return mainOutput; 
+function mainIO(data, callback = () => {}) {
+  asynclib.waterfall([
+    getInput,
+    main,
+    getOutput,
+  ], callback);
 }
 
 /************************************************************************* 

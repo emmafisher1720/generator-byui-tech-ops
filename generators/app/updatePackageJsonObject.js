@@ -6,11 +6,12 @@ module.exports = function () {
   this.packageJson.keywords = this.answers.keywords;
 
   //Add the byui key
-  this.packageJson.byui = {
+
+  this.packageJson.byui = Object.assign((this.packageJson.byui) ? this.packageJson.byui : {}, {
     documentGeneratorVersion: this.answers.generatorVersion,
     projectPurpose: this.answers.purpose,
     projectStakeholders: this.answers.stakeholders,
     projectSize: this.answers.size,
     timeCreated: this.answers.timeCreated
-  }
+  });
 }

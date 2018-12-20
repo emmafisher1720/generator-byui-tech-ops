@@ -14,6 +14,16 @@ function noBlank(input, answerHash) {
 module.exports = function () {
 
   // --------------  OVERALL QUESTIONS -----------------
+  var readMeQuestion = {
+    name: 'appendReadMe',
+    type: 'confirm',
+    message: messagePadEnd('A README.md file exists, would you like to append to the current ReadMe'),
+    suffix: ':',
+    validate: noBlank,
+    when: this.readMe !== "",
+    default: true
+  };
+
 
   /*Why am I asking the author question again when it has been asked by npm init?
     Two reasons: 
@@ -149,7 +159,6 @@ module.exports = function () {
   };
 
 
-
   var jsTemplateQuestion = {
     name: 'jsTemplate',
     type: 'list',
@@ -162,6 +171,7 @@ module.exports = function () {
   return [
 
     /* Overall Questions */
+    readMeQuestion,
     authorQuestion,
     descriptionQuestion,
     purposeQuestion,
@@ -175,8 +185,8 @@ module.exports = function () {
 
     requirementsQuestion,
     processQuestion,
-    addAdditionalKeywordsQuestion,
-    keywordsQuestion,
+    /* addAdditionalKeywordsQuestion, 
+     keywordsQuestion,  */
 
     /*   Code Set-up Questions */
     jsTemplateQuestion,

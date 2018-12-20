@@ -23,13 +23,14 @@ Install as a Module Instructions
 `const myMod = require('myMod');` \
 *note that the string that goes inside of your `require()` cooresponds with your package.json "name" property, and the entry point of your `require()` cooresponds with the "main" property in your package.json.*
 
-## Process might add some more to this.
+## Explanation
 <%= process %>
 
 ## Build 
-
+Specify how to build here
 
 ## Test
+Specify How to test here
 
 ## Requirements
 <%= requirements %>
