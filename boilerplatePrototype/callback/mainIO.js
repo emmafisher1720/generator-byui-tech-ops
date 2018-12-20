@@ -4,8 +4,8 @@
 const { main } = require('./main.js');
 
 /************************************************************************* 
- * Input Function. If it is complicated, consider abstracting it to a 
- * seperate file.
+ * Input Function
+ * If it is complicated, consider abstracting it to a seperate file.
  *************************************************************************/
 function getInput(data, callback) {
     var input;
@@ -14,8 +14,8 @@ function getInput(data, callback) {
 }
 
 /************************************************************************* 
- * Output Function. If it is complicated, consider abstracting it to a
- * seperate file.
+ * Output Function
+ * If it is complicated, consider abstracting it to a seperate file.
  *************************************************************************/
 function getOutput (data, callback) {
     // How to output data, eg. to csv, to json, to console, etc.
@@ -23,9 +23,10 @@ function getOutput (data, callback) {
 }
 
 /************************************************************************* 
- * mainIO is where the input and output functions get hooked up to 
+ * mainIO is where the input and output functions get hooked up to Main
  *************************************************************************/
 function mainIO (seed) {
+    var mainOutput;
     asynclib.waterfall([
         (callback) => callback (null, seed),
         getInput,
@@ -39,7 +40,7 @@ function mainIO (seed) {
 /************************************************************************* 
  * Export mainIO to the bin.js or to the next module who needs the logic 
  * of mainIO during its runtime. Ultimately any io module that needs to
- * be run on the command line or via `node runFile.js` should be included
- * as a file in the 'bin' folder. 
+ * be run on the command line or via `node filename.js` should be required
+ * by and run in file in the 'bin' folder. 
  *************************************************************************/
 module.exports = mainIO;

@@ -1,7 +1,7 @@
-const ioMain = require('./mainIO.js');
+const mainIO = require('./mainIO.js');
 
 function runIO (seed) {
-    ioMain(seed);
+    mainIO(seed);
 }
 
 runIO();
