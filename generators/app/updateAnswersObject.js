@@ -11,4 +11,5 @@ module.exports = function () {
   this.answers.parentProjectDescription = this.answers.hasParentProject ? `\nThis is part of the [${this.answers.parentProject}](${this.answers.parentProjectLink}) project.\n` : '';
   this.answers.timeCreated = moment().format('YYYY MMMM DD, hh:mm A');
   this.answers.generatorVersion = this.generatorVersion;
+  this.answers.keywords = (this.answers.addKeywords) ? this.packageJson.keywords.concat(this.answers.keywords.split(',')) : this.packageJson.keywords;
 }

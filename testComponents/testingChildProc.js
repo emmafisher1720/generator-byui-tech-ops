@@ -1,15 +1,42 @@
 const proc = require('child_process');
+// const test = require('inquirer')
 
-var npmInit = proc.spawn('npm init', {
-  stdio: [null, null, 'inherit'],
-  shell: true
-});
 
-process.stdin.pipe(npmInit.stdin);
-npmInit.stdout.on('data', function (data) {
-  console.log(data.toString());
+// process.env.VISUAL = "C:/Users/jedimasterryan/AppData/Local/Programs/Microsoft\ VS\ Code/Code.exe";
 
-});
+// console.log(`Editor is ${process.env.VISUAL}`);
+
+
+
+// var npmInit = proc.spawn('npm init', {
+//   stdio: [null, null, 'inherit'],
+//   shell: true
+// });
+
+// process.stdin.pipe(npmInit.stdin);
+// npmInit.stdout.on('data', function (data) {
+//   console.log(data.toString());
+
+// });
+
+// var keywordsQuestion = {
+//   name: 'keywords',
+//   type: 'input',
+//   message: 'List keywords to add separated by commas',
+//   suffix: ':',
+//   // TODO: fix the keywords filter.
+//   // This filter gives an error.
+//   filter: (input, answerHash) => {
+//     var array = input.split(',');
+//     return "Hello World";
+//   }
+// };
+
+// var questions = [keywordsQuestion];
+
+// test.prompt(questions).then(console.log);
+
+
 
 //console.log(npmInit.stdout.toString());
 // npmInit.on('close', function (code, signal) {

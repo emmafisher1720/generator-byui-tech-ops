@@ -114,26 +114,18 @@ module.exports = function () {
   }
   // ---------------------------------------------------------
 
-  var installInstructionsQuestion = {
-    name: 'installInstructions',
-    type: 'input',
-    message: messagePadEnd('Installation Instructions'),
-    suffix: ':',
-    validate: noBlank,
-  };
-
-  var runRequirementsQuestion = {
-    name: 'runRequirements',
-    type: 'input',
-    message: messagePadEnd('Run Requirements'),
+  var requirementsQuestion = {
+    name: 'requirements',
+    type: 'editor',
+    message: messagePadEnd('Project Reqiurements'),
     suffix: ':',
     validate: noBlank,
   };
 
   var processQuestion = {
     name: 'process',
-    type: 'input',
-    message: messagePadEnd('Process'),
+    type: 'editor',
+    message: messagePadEnd('Write everything you would need to know in order to run your tool/module including any commandline arguments, etc. (markdown is supported)'),
     suffix: ':',
     validate: noBlank,
   };
@@ -154,11 +146,6 @@ module.exports = function () {
     suffix: ':',
     validate: noBlank,
     when: (answerHash) => answerHash.addKeywords,
-    //TODO: fix the keywords filter.
-    //This filter gives an error.
-    // filter: (input) => {
-    //   return this.packageJson.keywords.concat(input.split(','));
-    // }
   };
 
 
@@ -186,9 +173,7 @@ module.exports = function () {
     parentProjectQuestion,
     parentProjectInputQuestion,
 
-
-    installInstructionsQuestion,
-    runRequirementsQuestion,
+    requirementsQuestion,
     processQuestion,
     addAdditionalKeywordsQuestion,
     keywordsQuestion,
