@@ -21,6 +21,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     //command was called.
     this.destinationRoot(this.contextRoot);
     this.generatorVersion = generatorPackageJson.version;
+
   }
 
   _setUpDestinationFolder(filename) {

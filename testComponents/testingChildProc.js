@@ -1,8 +1,10 @@
 const proc = require('child_process');
-const test = require('inquirer')
+// const test = require('inquirer')
 
 
+// process.env.VISUAL = "C:/Users/jedimasterryan/AppData/Local/Programs/Microsoft\ VS\ Code/Code.exe";
 
+// console.log(`Editor is ${process.env.VISUAL}`);
 
 
 
