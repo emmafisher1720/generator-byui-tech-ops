@@ -8,29 +8,18 @@
 
 ## How to Install
 
-1. Clone this repository:
-    ```bash
-    git clone <%= repositoryLink %>.git
-    ```
-1. Step into the folder that was just created 
-    ```bash
-    cd ./<%= repositoryName %>
-    ```
-1. To install dependancies, run:
-    ```bash
-    npm i
-    ```
+Install as a Module
 
-1. To initialize the program, run:
-    ```bash
-    npm start
-    ```
+Run the following command:
+```bash
+npm install --save git+<%= repositoryLink %>.git
+```
 <!--- TODO: Add Additional Installation/Set Up Instructions, then delete this comment  --->
 
 ## How to Use
-Run the following command:
+List the correct "require" syntax for your module to use it
 ```bash
-node <%= main %>
+const <%= repositoryName %> = require('<%= repositoryName %>');
 ```
 
 <!--- TODO: Add Additional Information on How to use the tool/module, then delete this comment  --->
@@ -46,6 +35,6 @@ From within the folder where the project resides, run the following:
 ```bash
 npm test
 ```
-<sub>This document created: <%= timeCreated %><sub>
+<sub>This document created: <%= timeCreated %> using document generator version: <%= generatorVersion %><sub>
 
 <!--- TODO: Review the readme for accuracy, then delete this comment--->

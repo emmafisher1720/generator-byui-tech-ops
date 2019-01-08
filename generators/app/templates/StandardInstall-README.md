@@ -8,6 +8,8 @@
 
 ## How to Install
 
+Standard Install
+
 1. Clone this repository:
     ```bash
     git clone <%= repositoryLink %>.git
