@@ -13,7 +13,7 @@ function noBlank(input, answerHash) {
 
 module.exports = function () {
 
-  // --------------  OVERALL QUESTIONS -----------------
+  // --------------  GENERAL QUESTIONS -----------------
   var readMeQuestion = {
     name: 'appendReadMe',
     type: 'confirm',
@@ -93,6 +93,36 @@ module.exports = function () {
     filter: (input) => sizePromptToValueAdapter[input]
   };
 
+  var requirementsQuestion = {
+    name: 'requirements',
+    type: 'editor',
+    message: messagePadEnd('Project Reqiurements'),
+    suffix: ':',
+    validate: noBlank,
+  };
+
+  var installTemplates = {
+    standard: 'Standard Install Instructions',
+    global: 'Global Install Instructions',
+    module: 'Module Install Instructions',
+  };
+
+  var installTemplatesToValueAdapter = {
+    [installTemplates.standard]: 'StandardInstall-README.md',
+    [installTemplates.global]: 'GlobalInstall-README.md',
+    [installTemplates.module]: 'ModuleInstall-README.md',
+  };
+
+  var readMeTemplateQuestion = {
+    name: 'readMeTemplate',
+    type: 'list',
+    message: messagePadEnd('What Install Instructions would you like?'),
+    suffix: ':',
+    choices: Object.values(installTemplates),
+    //Store the size value as a single word (mini, small, medium or large).
+    filter: (input) => installTemplatesToValueAdapter[input]
+  };
+
   // ---------------------------------------------------------
 
   //---------------  PARENT PROJECT QUESTIONS ----------------
@@ -124,17 +154,21 @@ module.exports = function () {
   }
   // ---------------------------------------------------------
 
-  var requirementsQuestion = {
-    name: 'requirements',
-    type: 'editor',
-    message: messagePadEnd('Project Reqiurements'),
+  //---------------  CODE SETUP QUESTIONS ----------------
+  var jsTemplateQuestion = {
+    name: 'jsTemplate',
+    type: 'list',
+    message: messagePadEnd('Choose your JavaScript Templates'),
     suffix: ':',
-    validate: noBlank,
+    choices: ['callback', 'promise', 'sync'],
+    when: () => this.options.new
   };
+  // ---------------------------------------------------------
 
-  var processQuestion = {
-    name: 'process',
-    type: 'editor',
+  //---------------  UNUSED QUESTIONS ----------------
+  var howToUseQuestion = {
+    name: 'howToUse',
+    type: 'input',
     message: messagePadEnd('Write everything you would need to know in order to run your tool/module including any commandline arguments, etc. (markdown is supported)'),
     suffix: ':',
     validate: noBlank,
@@ -157,39 +191,33 @@ module.exports = function () {
     validate: noBlank,
     when: (answerHash) => answerHash.addKeywords,
   };
+  // ---------------------------------------------------------
 
-
-  var jsTemplateQuestion = {
-    name: 'jsTemplate',
-    type: 'list',
-    message: messagePadEnd('Choose your JavaScript Templates'),
-    suffix: ':',
-    choices: ['callback', 'promise', 'sync'],
-    when: () => this.options.new
-  };
 
   return [
 
-    /* Overall Questions */
+    /* General Questions */
     readMeQuestion,
     authorQuestion,
     descriptionQuestion,
     purposeQuestion,
     stakeholdersQuestion,
     sizeQuestion,
+    requirementsQuestion,
+    readMeTemplateQuestion,
 
     /* Parent Project Questions */
     hasParentProjectQuestion,
     parentProjectQuestion,
     parentProjectInputQuestion,
 
-    requirementsQuestion,
-    processQuestion,
-    /* addAdditionalKeywordsQuestion, 
-     keywordsQuestion,  */
-
-    /*   Code Set-up Questions */
+    /*  Code Set-up Questions */
     jsTemplateQuestion,
+
+    /* UNUSED QUESTIONS */
+    /* howToUseQuestion, */
+    /* addAdditionalKeywordsQuestion, */
+    /* keywordsQuestion,  */
 
   ];
 

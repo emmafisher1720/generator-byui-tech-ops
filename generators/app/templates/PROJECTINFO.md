@@ -1,19 +1,19 @@
 # <%= repositoryName %>
 [Go to the Repository](<%= repositoryLink %>)
 <%= parentProjectDescription %>
-**Description**
-> <%= description %>
+## Description
+<%= description %>
 
-**Purpose**
-> <%= purpose %>
+## Purpose
+<%= purpose %>
                 
-**Stakeholders**
-> <%= stakeholders %>
+## Stakeholders
+<%= stakeholders %>
                     
-**Size**
-> <%= size %>
+## Size
+<%= size %>
 
-**Requirements**
+## Requirements
 <%= requirements %>
 
-This document created: <%= timeCreated %>
+<sub>This document created: <%= timeCreated %> using document generator version: <%= generatorVersion %><sub>

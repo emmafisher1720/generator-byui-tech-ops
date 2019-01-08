@@ -2,30 +2,38 @@
 const Generator = require('yeoman-generator');
 const proc = require('child_process');
 const chalk = require('chalk');
-const parentOptions = require('./templates/parentprojects.js');
-const generatorPackageJson = require('../../package.json');
 
 module.exports = class ByuiTechOpsGenerator extends Generator {
 
   constructor(args, opts) {
+
+    //Execute the parent class constructor (Generator)
     super(args, opts);
-    this.option('new');
-    this.parentOptions = parentOptions;
-    //Make the _cliPrompts method a class method. (This allows us to have class access from within cliPrompts)
+
+    //Create optional flags
+    this.option('new'); //Can use the --new on the command line.
+
+    //Get the list of parent projects from the parentprojects file.
+    this.parentOptions = require('./templates/parentprojects.js');
+
+    //Set up functions from other files by adding these functions as class methods, we have access
+    //to all the member variables.
     this._cliPrompts = require('./cliPrompts.js');
     this._updatePackageJsonObject = require('./updatePackageJsonObject.js');
     this._updateAnswersObject = require('./updateAnswersObject.js');
     this._readInFile = require('./readInFile.js');
     this._runNpmInit = require('./runNpmInit.js');
+    this._setUpDestinationFolder = function (filename) {
+      return (this.options.new) ? `${this.answers.repositoryName}/${filename}` : filename;
+    }
+
     //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
     //command was called.
     this.destinationRoot(this.contextRoot);
+
+    //Get the generator version number for tracking
+    const generatorPackageJson = require('../../package.json');
     this.generatorVersion = generatorPackageJson.version;
-
-  }
-
-  _setUpDestinationFolder(filename) {
-    return (this.options.new) ? `${this.answers.repositoryName}/${filename}` : filename;
   }
 
   async initializing() {
@@ -60,12 +68,16 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     }
   }
 
-  prompting() {
+  async prompting() {
     //Let the user know we are starting
     this.log(chalk.yellowBright("--------- Begin Custom Questionaire ---------"));
     return this.prompt(this._cliPrompts())
       .then(answers => {
         this.answers = answers;
+        return this.answers;
+      })
+      .catch(e => {
+        this.log("error", e.message);
       });
   }
 
@@ -84,7 +96,6 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     if (this.options.new) {
       proc.exec(`mkdir ${this.answers.repositoryName}`);
     }
-
     //Write PROJECTINFO.md
     this.fs.copyTpl(
       this.templatePath('PROJECTINFO.md'),
@@ -92,8 +103,6 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       this.answers
     );
 
-    //TODO: if a readme exists, leave it, and don't create an new one.
-    //Write package.json
     //TODO: We need to rewrite the package.json after we have updated it.
     this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
 
@@ -103,7 +112,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     if (this.readMe === "" || this.answers.appendReadMe === true) {
       //Write new README.md file
       this.fs.copyTpl(
-        this.templatePath('README.md'),
+        this.templatePath(this.answers.readMeTemplate),
         this.destinationPath(this._setUpDestinationFolder('README.md')),
         this.answers
       );
@@ -112,10 +121,6 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       this.newReadMe = this.fs.read(this._setUpDestinationFolder('README.md'));
       this.readMe = this.readMe + this.newReadMe;
       this.fs.write(this._setUpDestinationFolder('README.md'), this.readMe);
-
-      //This doesn't currently delete the temp folder.
-      // proc.spawnSync(`rm ${this._setUpDestinationFolder('temp_README.md')}`);
-
     }
 
     //Only generate the following boilerplate code for new projects

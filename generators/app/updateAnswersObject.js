@@ -4,7 +4,7 @@ const url = require('url');
 
 module.exports = function () {
   //Add the following to our answers object
-  //Need to test this line
+  this.answers.main = this.packageJson.main;
   this.answers.repositoryName = this.packageJson.name;
   this.answers.repositoryLink = new url.URL(this.answers.repositoryName, baseUrl).href;
   this.answers.parentProjectLink = new url.URL(this.answers.parentProject, baseUrl).href;
