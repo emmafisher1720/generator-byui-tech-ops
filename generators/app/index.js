@@ -13,6 +13,9 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     //Create optional flags
     this.option('new'); //Can use the --new on the command line.
 
+    //TODO: See if this will work!
+    //this.options.force = true;
+
     //Get the list of parent projects from the parentprojects file.
     this.parentOptions = require('./templates/parentprojects.js');
 
@@ -151,7 +154,9 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
   conflicts() {
     //Handle conflicts auto do this
-    // var conflict = new Conflicter(ByuiTechOpsGenerator, false);
+    // var conflict = new Conflicter(this, true);
+    // conflict.checkForCollision(`${this.contextRoot}/package.json`, contents, callback);
+
   }
 
   install() {
