@@ -38,7 +38,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
         code = await this._runNpmInit();
       } while (code === 1);
     } catch (e) {
-      //Error running NPM Init
+      //If we are here, there was an error running NPM Init
       this.log(chalk.red("ERROR: " + e.message));
     }
 
