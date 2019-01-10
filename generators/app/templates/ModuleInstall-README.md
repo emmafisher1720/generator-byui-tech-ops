@@ -3,9 +3,6 @@
 ## Description 
 <%= description %>
 
-## Project Requirements
-<%= requirements %>
-
 ## How to Install
 
 Install as a Module

@@ -13,22 +13,24 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     //Create optional flags
     this.option('new'); //Can use the --new on the command line.
 
-    //TODO: See if this will work!
-    //this.options.force = true;
+    //This takes out the questions at the end which ask whether we should overwrite the file or not
+    this.conflicter.force = true;
 
     //Get the list of parent projects from the parentprojects file.
     this.parentOptions = require('./templates/parentprojects.js');
 
     //Set up functions from other files by adding these functions as class methods, we have access
     //to all the member variables.
-    this._cliPrompts = require('./cliPrompts.js');
-    this._updatePackageJsonObject = require('./updatePackageJsonObject.js');
-    this._updateAnswersObject = require('./updateAnswersObject.js');
-    this._readInFile = require('./readInFile.js');
-    this._runNpmInit = require('./runNpmInit.js');
+    this._documentQuestions = require('./questions/documentQuestions.js');
+    this._updatePackageJsonObject = require('./core functions/updatePackageJsonObject.js');
+    this._updateAnswersObject = require('./core functions/updateAnswersObject.js');
+    this._readInFile = require('./core functions/readInFile.js');
+    this._runNpmInit = require('./core functions/runNpmInit.js');
     this._setUpDestinationFolder = function (filename) {
       return (this.options.new) ? `${this.answers.repositoryName}/${filename}` : filename;
     }
+    this._preQuestions = require('./questions/preQuestions.js');
+    this._postQuestions = require('./questions/postQuestions.js');
 
     //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
     //command was called.
@@ -41,11 +43,20 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
   async initializing() {
 
-    var that = this;
+    this.log(chalk.yellowBright("\nWelcome to the BYUI-TECH-OPS project generator"));
+    await this.prompt(this._preQuestions())
+      .then(preQuestionResponses => {
+        this.preQuestionResponses = preQuestionResponses;
+      })
+      .catch(e => {
+        this.log("Error in pre questions: ", e.message);
+      });
+
+
     try {
       var code = 1;
       do {
-        this.log(chalk.yellowBright("---------- Running NPM INIT -----------"));
+        this.log(chalk.yellowBright("\n---------- Running NPM INIT -----------"));
         code = await this._runNpmInit();
       } while (code === 1);
     } catch (e) {
@@ -73,14 +84,14 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
   async prompting() {
     //Let the user know we are starting
-    this.log(chalk.yellowBright("--------- Begin Custom Questionaire ---------"));
-    return this.prompt(this._cliPrompts())
+    this.log(chalk.yellowBright("\n--------- Begin Custom Questionaire ---------"));
+    return this.prompt(this._documentQuestions())
       .then(answers => {
         this.answers = answers;
         return this.answers;
       })
       .catch(e => {
-        this.log("error", e.message);
+        this.log("Error when prompting for document questions: ", e.message);
       });
   }
 
@@ -95,23 +106,30 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
   writing() {
 
+    this.log(chalk.yellowBright("\n--------- Writing Files ---------"));
+
     //Create a new directory if the --new flag is found
     if (this.options.new) {
       proc.exec(`mkdir ${this.answers.repositoryName}`);
     }
-    //Write PROJECTINFO.md
-    this.fs.copyTpl(
-      this.templatePath('PROJECTINFO.md'),
-      this.destinationPath(this._setUpDestinationFolder('PROJECTINFO.md')),
-      this.answers
-    );
 
-    //TODO: We need to rewrite the package.json after we have updated it.
+    //Write the package.json
     this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
 
+    //Write PROJECTINFO.md
+    if (this.projectInfo === "" || this.answers.appendProjectInfo === true) {
+      this.fs.copyTpl(
+        this.templatePath('PROJECTINFO.md'),
+        this.destinationPath(this._setUpDestinationFolder('PROJECTINFO.md')),
+        this.answers
+      );
 
+      this.newProjectInfo = this.fs.read(this._setUpDestinationFolder('PROJECTINFO.md'));
+      this.projectInfo = this.projectInfo + this.newProjectInfo;
+      this.fs.write(this._setUpDestinationFolder('PROJECTINFO.md'), this.projectInfo);
+    }
 
-    //Probably will break this out so that we aren't doing so much work when a readme doesn't exist.
+    //Write the README.md
     if (this.readMe === "" || this.answers.appendReadMe === true) {
       //Write new README.md file
       this.fs.copyTpl(
@@ -120,7 +138,6 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
         this.answers
       );
 
-      //Have not tested this!
       this.newReadMe = this.fs.read(this._setUpDestinationFolder('README.md'));
       this.readMe = this.readMe + this.newReadMe;
       this.fs.write(this._setUpDestinationFolder('README.md'), this.readMe);
@@ -153,18 +170,41 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
   }
 
   conflicts() {
-    //Handle conflicts auto do this
-    // var conflict = new Conflicter(this, true);
-    // conflict.checkForCollision(`${this.contextRoot}/package.json`, contents, callback);
-
+    //No need to code here yet.
   }
 
   install() {
+    //Can install dependencies, but for now we are leaving this blank
     // this.installDependencies();
   }
 
-  end() {
-    //this.log("in end method");
+  async end() {
+    //Can perform any task here to happen at the end (any cleanup tasks can happen here)
+
+    this.log(chalk.yellowBright("\n-----------  Begin Clean-up Process -----------"));
+    this.weNeedATodoList = (this.answers.appendReadMe || this.answers.appendProjectInfo || this.answers.appendReadMe !== false);
+    if (this.weNeedATodoList) {
+      this.log("You have finished part 1 of the documentation process!\nPart 2 is manual and here is your TODO list:\n");
+      this.answers.appendReadMe ? this.log("[ ] You have appended to README.md, clean-up duplicate information in README.md") : null;
+      this.answers.appendProjectInfo ? this.log("[ ] You have appended to PROJECTINFO.md, clean-up duplicate information in PROJECTINFO.md") : null;
+      //If the this.answers.appendReadMe is undefined or true, there will be comments in the README.md file that need to be resolved.
+      this.answers.appendReadMe !== false ? this.log("[ ] Review the TODO markdown comments for README.md to complete the ReadMe File") : null;
+      //Add a line return
+      this.log("");
+      await this.prompt(this._postQuestions())
+        .then(postQuestionResponses => {
+          this.postQuestionResponses = postQuestionResponses;
+        })
+        .catch(e => {
+          this.log("Error in post questions: ", e.message);
+        });
+    }
+
+    //Display the ending message
+    this.log(chalk.yellowBright(`\n --- Congratulations, you have successfully documented the \"${this.answers.repositoryName}\" repo! ---\n`));
+    this.log(`As a final step, don't forget to run:\n\n${chalk.yellowBright("\tgit add .\n\tgit commit -m \"commit message\"\n\tgit pull\n\tgit push\n")}`);
+
+    //IDEA for projects.  Handle git push and pull for you.
     //proc.exec(`cd ${this.repositoryName}`)
   }
 

@@ -10,6 +10,7 @@ module.exports = function () {
     documentGeneratorVersion: this.answers.generatorVersion,
     projectPurpose: this.answers.purpose,
     projectStakeholders: this.answers.stakeholders,
+    projectRequirements: this.answers.requirements,
     projectSize: this.answers.size,
     timeCreated: this.answers.timeCreated
   });

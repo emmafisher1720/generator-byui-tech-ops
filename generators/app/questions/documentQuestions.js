@@ -1,15 +1,4 @@
-const thisFolderInfo = require('./thisFolderInfo.js');
-const chalk = require('chalk');
-
-function messagePadEnd(string) {
-  let padding = 33;
-  return string.padEnd(padding);
-}
-
-function noBlank(input, answerHash) {
-  if (input !== undefined && input.replace(/\s/g, '') !== '') return true;
-  else return 'this cannot be left blank!';
-}
+const questionTools = require('./questionTools.js');
 
 module.exports = function () {
 
@@ -17,10 +6,20 @@ module.exports = function () {
   var readMeQuestion = {
     name: 'appendReadMe',
     type: 'confirm',
-    message: messagePadEnd('A README.md file exists, would you like to append to the current ReadMe'),
+    message: questionTools.messagePadEnd('A README.md file exists, would you like to append to the current ReadMe'),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
     when: this.readMe !== "",
+    default: true
+  };
+
+  var projectInfoQuestion = {
+    name: 'appendProjectInfo',
+    type: 'confirm',
+    message: questionTools.messagePadEnd('A PROJECTINFO.md file exists, would you like to append to the current Project File'),
+    suffix: ':',
+    validate: questionTools.noBlank,
+    when: this.projectInfo !== "",
     default: true
   };
 
@@ -35,9 +34,9 @@ module.exports = function () {
   var authorQuestion = {
     name: 'author',
     type: 'input',
-    message: messagePadEnd('Verify Author'),
+    message: questionTools.messagePadEnd('Verify Author'),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
     default: this.packageJson.author
   };
 
@@ -47,26 +46,28 @@ module.exports = function () {
   var descriptionQuestion = {
     name: 'description',
     type: 'editor',
-    message: messagePadEnd('Verify Project Description'),
+    message: questionTools.messagePadEnd('Verify Project Description'),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
     default: this.packageJson.description
   };
 
   var purposeQuestion = {
     name: 'purpose',
     type: 'input',
-    message: messagePadEnd('Project Purpose (Why)'),
+    message: questionTools.messagePadEnd('Project Purpose (Why)'),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
+    default: (this.packageJson.byui && this.packageJson.byui.projectPurpose) ? this.packageJson.byui.projectPurpose : ""
   };
 
   var stakeholdersQuestion = {
     name: 'stakeholders',
     type: 'input',
-    message: messagePadEnd('Project Stakeholders'),
+    message: questionTools.messagePadEnd('Project Stakeholders'),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
+    default: (this.packageJson.byui && this.packageJson.byuiprojectStakeholders) ? this.packageJson.byui.projectStakeholders : ""
   };
 
   var sizeValueToPromptAdapter = {
@@ -86,19 +87,22 @@ module.exports = function () {
   var sizeQuestion = {
     name: 'size',
     type: 'list',
-    message: messagePadEnd('What is the size of this project?'),
+    message: questionTools.messagePadEnd('What is the size of this project?'),
     suffix: ':',
     choices: Object.values(sizeValueToPromptAdapter),
+    default: (this.packageJson.byui && this.packageJson.byui.projectSize) ? sizeValueToPromptAdapter[this.packageJson.byui.projectSize] : sizeValueToPromptAdapter["mini"],
     //Store the size value as a single word (mini, small, medium or large).
-    filter: (input) => sizePromptToValueAdapter[input]
+    filter: (input) => sizePromptToValueAdapter[input],
+
   };
 
   var requirementsQuestion = {
     name: 'requirements',
     type: 'editor',
-    message: messagePadEnd('Project Reqiurements'),
+    message: questionTools.messagePadEnd('Project Reqiurements'),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
+    default: (this.packageJson.byui && this.packageJson.byui.projectRequirements) ? this.packageJson.byui.projectRequirements : ""
   };
 
   var installTemplates = {
@@ -116,7 +120,7 @@ module.exports = function () {
   var readMeTemplateQuestion = {
     name: 'readMeTemplate',
     type: 'list',
-    message: messagePadEnd('What Install Instructions would you like?'),
+    message: questionTools.messagePadEnd('What Install Instructions would you like?'),
     suffix: ':',
     choices: Object.values(installTemplates),
     //Store the size value as a single word (mini, small, medium or large).
@@ -129,7 +133,7 @@ module.exports = function () {
   var hasParentProjectQuestion = {
     name: 'hasParentProject',
     type: 'confirm',
-    message: messagePadEnd('Is this a child-repository?'),
+    message: questionTools.messagePadEnd('Is this a child-repository?'),
     suffix: ':',
     default: false,
   };
@@ -137,20 +141,20 @@ module.exports = function () {
   var parentProjectQuestion = {
     name: 'parentProject',
     type: 'list',
-    message: messagePadEnd('What is the parent project?'),
+    message: questionTools.messagePadEnd('What is the parent project?'),
     suffix: ':',
     choices: this.parentOptions,
     when: (answerHash) => answerHash.hasParentProject,
-    validate: noBlank,
+    validate: questionTools.noBlank,
   };
 
   var parentProjectInputQuestion = {
     name: 'parentProject',
     type: 'input',
-    message: messagePadEnd('Enter EXACT name of parent project (see repo)'),
+    message: questionTools.messagePadEnd('Enter EXACT name of parent project (see repo)'),
     suffix: ':',
     when: (answerHash) => answerHash.parentProject == 'other',
-    validate: noBlank,
+    validate: questionTools.noBlank,
   }
   // ---------------------------------------------------------
 
@@ -158,7 +162,7 @@ module.exports = function () {
   var jsTemplateQuestion = {
     name: 'jsTemplate',
     type: 'list',
-    message: messagePadEnd('Choose your JavaScript Templates'),
+    message: questionTools.messagePadEnd('Choose your JavaScript Templates'),
     suffix: ':',
     choices: ['callback', 'promise', 'sync'],
     when: () => this.options.new
@@ -169,26 +173,26 @@ module.exports = function () {
   var howToUseQuestion = {
     name: 'howToUse',
     type: 'input',
-    message: messagePadEnd('Write everything you would need to know in order to run your tool/module including any commandline arguments, etc. (markdown is supported)'),
+    message: questionTools.messagePadEnd('Write everything you would need to know in order to run your tool/module including any commandline arguments, etc. (markdown is supported)'),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
   };
 
   var addAdditionalKeywordsQuestion = {
     name: 'addKeywords',
     type: 'confirm',
-    message: messagePadEnd(`Add more keywords? (${this.packageJson.keywords ? this.packageJson.keywords.join(',') : ''})`),
+    message: questionTools.messagePadEnd(`Add more keywords? (${this.packageJson.keywords ? this.packageJson.keywords.join(',') : ''})`),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
     default: false
   }
 
   var keywordsQuestion = {
     name: 'keywords',
     type: 'input',
-    message: messagePadEnd('List keywords to add separated by commas'),
+    message: questionTools.messagePadEnd('List keywords to add separated by commas'),
     suffix: ':',
-    validate: noBlank,
+    validate: questionTools.noBlank,
     when: (answerHash) => answerHash.addKeywords,
   };
   // ---------------------------------------------------------
@@ -198,6 +202,7 @@ module.exports = function () {
 
     /* General Questions */
     readMeQuestion,
+    projectInfoQuestion,
     authorQuestion,
     descriptionQuestion,
     purposeQuestion,
