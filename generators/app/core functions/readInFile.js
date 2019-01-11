@@ -1,3 +1,5 @@
+const chalk = require('chalk');
+
 module.exports = function (key, fileName) {
   try {
     if (/.json/.test(fileName)) {

@@ -29,16 +29,15 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     this._updateAnswersObject = require('./core functions/updateAnswersObject.js');
     this._readInFile = require('./core functions/readInFile.js');
     this._runNpmInit = require('./core functions/runNpmInit.js');
-    this._setUpDestinationFolder = function (filename) {
-      return (this.options.new) ? `${this.answers.repositoryName}/${filename}` : filename;
-    }
     this._preQuestions = require('./questions/preQuestions.js');
     this._postQuestions = require('./questions/postQuestions.js');
 
     //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
     //command was called.
+    if (this.options.new) {
+      this.contextRoot = this.contextRoot + '/temp';
+    }
     this.destinationRoot(this.contextRoot);
-
     //Get the generator version number for tracking
     const generatorPackageJson = require('../../package.json');
     this.generatorVersion = generatorPackageJson.version;
@@ -71,9 +70,10 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       //If we are here, there was an error running NPM Init
       this.log(chalk.red("ERROR running npm init: " + e.message));
     }
-
+    this.log("We get to package.json!");
     //Read in package.json
     this._readInFile("packageJson", "package.json");
+    this.log("We get passed package.json!");
 
     //Read in README.md if one exists
     if (this.fs.exists('README.md')) {
@@ -116,25 +116,20 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
 
     this.log(chalk.yellowBright("\n--------- Writing Files ---------"));
 
-    //Create a new directory if the --new flag is found
-    if (this.options.new) {
-      proc.exec(`mkdir ${this.answers.repositoryName}`);
-    }
-
     //Write the package.json
-    this.fs.writeJSON(this._setUpDestinationFolder('package.json'), this.packageJson);
+    this.fs.writeJSON('package.json', this.packageJson);
 
     //Write PROJECTINFO.md
     if (this.projectInfo === "" || this.answers.appendProjectInfo === true) {
       this.fs.copyTpl(
         this.templatePath('PROJECTINFO.md'),
-        this.destinationPath(this._setUpDestinationFolder('PROJECTINFO.md')),
+        this.destinationPath('PROJECTINFO.md'),
         this.answers
       );
 
-      this.newProjectInfo = this.fs.read(this._setUpDestinationFolder('PROJECTINFO.md'));
+      this.newProjectInfo = this.fs.read('PROJECTINFO.md');
       this.projectInfo = this.projectInfo + this.newProjectInfo;
-      this.fs.write(this._setUpDestinationFolder('PROJECTINFO.md'), this.projectInfo);
+      this.fs.write('PROJECTINFO.md', this.projectInfo);
     }
 
     //Write the README.md
@@ -142,13 +137,13 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       //Write new README.md file
       this.fs.copyTpl(
         this.templatePath(`ReadMe Templates/${this.answers.readMeTemplate}`),
-        this.destinationPath(this._setUpDestinationFolder('README.md')),
+        this.destinationPath('README.md'),
         this.answers
       );
 
-      this.newReadMe = this.fs.read(this._setUpDestinationFolder('README.md'));
+      this.newReadMe = this.fs.read('README.md');
       this.readMe = this.readMe + this.newReadMe;
-      this.fs.write(this._setUpDestinationFolder('README.md'), this.readMe);
+      this.fs.write('README.md', this.readMe);
     }
 
     //Only generate the following boilerplate code for new projects
@@ -156,21 +151,21 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       //Write main.js file
       this.fs.copyTpl(
         this.templatePath(`jsTemplates/${this.answers.jsTemplate}/main.js`),
-        this.destinationPath(this._setUpDestinationFolder('main.js')),
+        this.destinationPath('main.js'),
         this.answers
       );
 
       //Write bin.js file
       this.fs.copyTpl(
         this.templatePath(`jsTemplates/${this.answers.jsTemplate}/bin.js`),
-        this.destinationPath(this._setUpDestinationFolder('bin.js')),
+        this.destinationPath('bin.js'),
         this.answers
       );
 
       //Write test.js file
       this.fs.copyTpl(
         this.templatePath(`jsTemplates/${this.answers.jsTemplate}/test.js`),
-        this.destinationPath(this._setUpDestinationFolder('test.js')),
+        this.destinationPath('test.js'),
         this.answers
       );
     }
@@ -200,6 +195,12 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       //Add a line return
       this.log("");
 
+      //Open the files in VS Code to facilitate review
+      if (this.options.new) {
+        proc.exec(`cd ${this.answers.repositoryName}`);
+      }
+      proc.exec(`code .`);
+      proc.exec(`code README.md`);
       //Keep displaying the todo list until the user answers that the todo list was complete
       do {
 
@@ -218,8 +219,8 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     this.log(chalk.yellowBright(`\n --- Congratulations, you have successfully documented the \"${this.answers.repositoryName}\" repo! ---\n`));
     this.log(`As a final step, don't forget to run:\n\n${chalk.yellowBright("\tgit add .\n\tgit commit -m \"commit message\"\n\tgit pull\n\tgit push\n")}`);
 
-    //IDEA for projects.  Handle git push and pull for you.
-    //proc.exec(`cd ${this.repositoryName}`)
+    //IDEA for future projects.  Handle git push and pull for you.
+
   }
 
 };
