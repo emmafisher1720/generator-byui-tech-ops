@@ -26,9 +26,12 @@ module.exports = function () {
     when: (!this.options.new && !thisFolderInfo.isGitRepository())
   };
 
-  return [
+  helperQuestions = [
     calledFromCorrectFolderQuestion,
     notFromAGitRepoQuestion,
   ];
+
+  //If the user has run the generator with the --exp flag, then that user has decided to not have all the extra helper questions
+  return (this.options.exp) ? [] : helperQuestions;
 
 }

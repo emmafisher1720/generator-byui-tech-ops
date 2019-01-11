@@ -67,7 +67,7 @@ module.exports = function () {
     message: questionTools.messagePadEnd('Project Stakeholders'),
     suffix: ':',
     validate: questionTools.noBlank,
-    default: (this.packageJson.byui && this.packageJson.byuiprojectStakeholders) ? this.packageJson.byui.projectStakeholders : ""
+    default: (this.packageJson.byui && this.packageJson.byui.projectStakeholders) ? this.packageJson.byui.projectStakeholders : ""
   };
 
   var sizeValueToPromptAdapter = {

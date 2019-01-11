@@ -11,13 +11,16 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     super(args, opts);
 
     //Create optional flags
+    //This does the set-up for a new project
     this.option('new'); //Can use the --new on the command line.
+    //This removes helper/warning questions if the user is experienced (exp stands for experienced).
+    this.option('exp'); //Can use the --exp on the command line.
 
     //This takes out the questions at the end which ask whether we should overwrite the file or not
     this.conflicter.force = true;
 
     //Get the list of parent projects from the parentprojects file.
-    this.parentOptions = require('./templates/parentprojects.js');
+    this.parentOptions = require('./templates/lists/parentprojects.js');
 
     //Set up functions from other files by adding these functions as class methods, we have access
     //to all the member variables.
@@ -52,6 +55,11 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
         this.log("Error in pre questions: ", e.message);
       });
 
+    //If the user has selected to not proceed at the Not-in-Git-Repo-Warning, then exit
+    if (this.preQuestionResponses.proceedEvenThoughNotInGitRepo === false) {
+      this.log(chalk.yellowBright("----- Aborting -----"));
+      process.exit(0);
+    }
 
     try {
       var code = 1;
@@ -61,7 +69,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       } while (code === 1);
     } catch (e) {
       //If we are here, there was an error running NPM Init
-      this.log(chalk.red("ERROR: " + e.message));
+      this.log(chalk.red("ERROR running npm init: " + e.message));
     }
 
     //Read in package.json
@@ -133,7 +141,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     if (this.readMe === "" || this.answers.appendReadMe === true) {
       //Write new README.md file
       this.fs.copyTpl(
-        this.templatePath(this.answers.readMeTemplate),
+        this.templatePath(`ReadMe Templates/${this.answers.readMeTemplate}`),
         this.destinationPath(this._setUpDestinationFolder('README.md')),
         this.answers
       );
@@ -191,13 +199,19 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       this.answers.appendReadMe !== false ? this.log("[ ] Review the TODO markdown comments for README.md to complete the ReadMe File") : null;
       //Add a line return
       this.log("");
-      await this.prompt(this._postQuestions())
-        .then(postQuestionResponses => {
-          this.postQuestionResponses = postQuestionResponses;
-        })
-        .catch(e => {
-          this.log("Error in post questions: ", e.message);
-        });
+
+      //Keep displaying the todo list until the user answers that the todo list was complete
+      do {
+
+        (this.postQuestionResponses && this.postQuestionResponses.todoListComplete !== true) ? this.log(chalk.bgRed("\nYou Must Complete the Todo List before proceeding!\n")): null;
+        await this.prompt(this._postQuestions())
+          .then(postQuestionResponses => {
+            this.postQuestionResponses = postQuestionResponses;
+          })
+          .catch(e => {
+            this.log("Error in post questions: ", e.message);
+          });
+      } while (!this.postQuestionResponses.todoListComplete);
     }
 
     //Display the ending message
