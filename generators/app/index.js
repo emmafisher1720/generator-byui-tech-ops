@@ -4,7 +4,7 @@ const proc = require('child_process');
 const chalk = require('chalk');
 
 module.exports = class ByuiTechOpsGenerator extends Generator {
-
+  //TODO: Finish new flag process.
   constructor(args, opts) {
 
     //Execute the parent class constructor (Generator)
