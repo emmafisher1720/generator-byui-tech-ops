@@ -26,12 +26,27 @@ module.exports = function () {
     when: (!this.options.new && !thisFolderInfo.isGitRepository())
   };
 
+  var repositoryNameForNewProjectsQuestion = {
+    name: 'repositoryNameForNewProjects',
+    type: 'input',
+    message: questionTools.messagePadEnd('Enter the repository name (no spaces, caps or special characters)'),
+    suffix: ':',
+    validate: questionTools.noBlank,
+    //Only ask this question when we are talking about a new project (the --new flag exists)
+    when: (this.options.new)
+  };
+
   helperQuestions = [
     calledFromCorrectFolderQuestion,
     notFromAGitRepoQuestion,
   ];
 
+  generalQuestions = [
+    repositoryNameForNewProjectsQuestion,
+  ];
+
+
   //If the user has run the generator with the --exp flag, then that user has decided to not have all the extra helper questions
-  return (this.options.exp) ? [] : helperQuestions;
+  return (this.options.exp) ? generalQuestions : [...helperQuestions, ...generalQuestions];
 
 }

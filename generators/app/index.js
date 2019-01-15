@@ -4,9 +4,8 @@ const proc = require('child_process');
 const chalk = require('chalk');
 
 module.exports = class ByuiTechOpsGenerator extends Generator {
-  //TODO: Finish new flag process.
   constructor(args, opts) {
-
+    //TODO: Add functionality to not allow spaces, special characters or caps in the naming of a folder for new projects.
     //Execute the parent class constructor (Generator)
     super(args, opts);
 
@@ -32,12 +31,6 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     this._preQuestions = require('./questions/preQuestions.js');
     this._postQuestions = require('./questions/postQuestions.js');
 
-    //This sets the destination root folder, so that no matter what the contents will be placed in the folder from which the yo byui-tech-ops
-    //command was called.
-    if (this.options.new) {
-      this.contextRoot = this.contextRoot + '/temp';
-    }
-    this.destinationRoot(this.contextRoot);
     //Get the generator version number for tracking
     const generatorPackageJson = require('../../package.json');
     this.generatorVersion = generatorPackageJson.version;
@@ -53,6 +46,16 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       .catch(e => {
         this.log("Error in pre questions: ", e.message);
       });
+
+    //If the project is new, then we will have been asked the repositoryNameForNewProjectsQuestion (see preQuestions.js). 
+    //We need this response in order to set the folder name for the new project.
+    //Changing the contextRoot changes where we call commands from (like npm init).
+    if (this.options.new) {
+      this.contextRoot = this.contextRoot + `/${this.preQuestionResponses.repositoryNameForNewProjects}`;
+    }
+    //Setting the destination root (where documents are printed to), to either where the command was called from (for existing projects),
+    //or to where the new folder has been created (for new projects).
+    this.destinationRoot(this.contextRoot);
 
     //If the user has selected to not proceed at the Not-in-Git-Repo-Warning, then exit
     if (this.preQuestionResponses.proceedEvenThoughNotInGitRepo === false) {
@@ -113,7 +116,6 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
   }
 
   writing() {
-
     this.log(chalk.yellowBright("\n--------- Writing Files ---------"));
 
     //Write the package.json
@@ -168,6 +170,7 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
         this.destinationPath('test.js'),
         this.answers
       );
+
     }
 
   }
@@ -192,15 +195,16 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
       this.answers.appendProjectInfo ? this.log("[ ] You have appended to PROJECTINFO.md, clean-up duplicate information in PROJECTINFO.md") : null;
       //If the this.answers.appendReadMe is undefined or true, there will be comments in the README.md file that need to be resolved.
       this.answers.appendReadMe !== false ? this.log("[ ] Review the TODO markdown comments for README.md to complete the ReadMe File") : null;
+      this.options.new && this.answers.repositoryName !== this.preQuestionResponses.repositoryNameForNewProjects ? this.log("[ ] Your folder name and repo name do not match. Rename the folder") : null;
       //Add a line return
       this.log("");
 
-      //Open the files in VS Code to facilitate review
-      if (this.options.new) {
-        proc.exec(`cd ${this.answers.repositoryName}`);
-      }
-      proc.exec(`code .`);
-      proc.exec(`code README.md`);
+      //Rename the repo
+
+      //proc.execSync(`ren ${this.newFolderName} ${this.answers.repositoryName}`);
+      //proc.execSync(`cd ${this.answers.repositoryName}`);
+      proc.execSync(`code .`);
+      proc.execSync(`code README.md`);
       //Keep displaying the todo list until the user answers that the todo list was complete
       do {
 
@@ -220,7 +224,6 @@ module.exports = class ByuiTechOpsGenerator extends Generator {
     this.log(`As a final step, don't forget to run:\n\n${chalk.yellowBright("\tgit add .\n\tgit commit -m \"commit message\"\n\tgit pull\n\tgit push\n")}`);
 
     //IDEA for future projects.  Handle git push and pull for you.
-
   }
 
 };
